@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#081a22">
+  <meta name="description" content="Theo chân Mây thắp lại năm chiếc đèn trên hòn đảo giữa biển mây. Một game 3D cổ tích.">
+  <title>Đảo Đèn Lồng · Đêm 1</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+  <canvas id="world" aria-label="Đảo Đèn Lồng, thế giới 3D"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Trang đầu Đảo Đèn Lồng"><span class="brand-mark">✧</span><span>ĐẢO ĐÈN LỒNG<small>MỘT ĐỐM SÁNG, MỘT HY VỌNG</small></span></a>
+    <div class="chapter"><span>ĐÊM 01</span> Đảo Bến</div>
+    <button id="help" class="icon-button" aria-label="Hướng dẫn điều khiển" title="Hướng dẫn điều khiển">?</button>
+  </header>
+  <main>
+    <section id="intro" class="panel intro" aria-labelledby="intro-title">
+      <p class="eyebrow"><span></span> CHUYẾN ĐI CỦA NGƯỜI GIỮ ĐÈN</p>
+      <h1 id="intro-title">Đêm còn tối.<br><em>Đèn còn chờ.</em></h1>
+      <p class="description">Sương đen đã phủ kín Đảo Bến.<br>Cùng Mây gom những đốm sáng, thắp lại<br>năm chiếc đèn và tìm đường về ánh sáng.</p>
+      <button id="start" class="primary">Bắt đầu hành trình <span>✧</span></button>
+      <div class="intro-controls"><span><kbd>W A S D</kbd> Di chuyển</span><span><kbd>E</kbd> Thắp đèn</span><span><kbd>Q</kbd> Tỏa sáng</span></div>
+      <p class="quiet">Khoảng 5 phút · Bật âm thanh để nghe đảo thức giấc</p>
+    </section>
+    <section id="hud" hidden aria-label="Thông tin lượt chơi">
+      <div class="vitals glass">
+        <div class="stat-title">NGỌN LỬA CỦA MÂY <span id="health">◆ ◆ ◆</span></div>
+        <div class="bag"><span class="mote-icon">✦</span><strong id="carried">0</strong><span>/ 20 đom đóm</span></div>
+        <div class="meter"><div id="carry-bar"></div></div>
+        <p>Tỏa sáng tốn 3 đom đóm</p>
+      </div>
+      <div class="objective glass"><span class="stat-title">THẮP SÁNG ĐẢO BẾN</span><div id="lamps" class="lamp-dots"></div><span id="lamp-count">0 / 5 đèn đã sáng</span></div>
+      <div class="map-box glass"><canvas id="map" width="180" height="180" aria-label="Bản đồ đảo: vị trí Mây, đèn và Bóng Mực"></canvas><div><span id="timer">05:00</span><span id="score">0 điểm</span></div></div>
+      <p id="hint" class="hint">Gom đom đóm rồi mang về những chiếc đèn.</p>
+      <div class="bottom-controls glass"><span><kbd>W A S D</kbd> Di chuyển</span><span><kbd>Space</kbd> Nhảy</span><span><kbd>E</kbd> Nạp đèn</span><span><kbd>Q</kbd> Tỏa sáng</span><span><kbd>← →</kbd> Xoay camera</span></div>
+    </section>
+    <section id="ending" class="panel ending" hidden aria-labelledby="end-title">
+      <p class="eyebrow">CHUYẾN ĐI CỦA MÂY</p><span id="end-symbol" class="end-symbol">✧</span>
+      <h1 id="end-title">Đảo đã sáng lại.</h1><p id="end-copy" class="description"></p>
+      <div id="end-score" class="end-score"></div><button id="restart" class="primary">Thắp một đêm nữa <span>✧</span></button>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="error" class="error" hidden role="alert"></div>
+  </main>
+  <footer id="intro-footer"><span>ĐÊM 1 — ĐẢO BẾN</span><span>Đừng để ánh sáng tắt.</span><button id="sound" class="sound-button" aria-pressed="false">Âm thanh: tắt</button></footer>
+  <dialog id="help-dialog"><button id="close-help" class="icon-button" aria-label="Đóng hướng dẫn">×</button><p class="eyebrow">NGƯỜI GIỮ ĐÈN NHỎ TUỔI</p><h2>Mang ánh sáng về đảo.</h2><p>Gom đom đóm vàng và nhấn <kbd>E</kbd> gần đèn. Mỗi đèn cần 10 con; túi chứa tối đa 20. Thắp cả 5 đèn trước khi hết 5 phút để thắng.</p><p><kbd>WASD</kbd> hoặc phím lên/xuống: đi · <kbd>Space</kbd>: nhảy · <kbd>Q</kbd>: tỏa sáng (3 đom đóm). Giữ chuột và kéo hoặc dùng <kbd>← →</kbd> để xoay camera.</p><p>Bóng Mực tím đen đuổi theo bạn. Tỏa sáng làm chúng choáng; đèn đã thắp là nơi trú an toàn. Bạn có 3 ngọn lửa, mỗi lần bị chạm rơi một phần đom đóm.</p><p>Trò chơi tạm dừng khi mở hướng dẫn hoặc chuyển tab.</p></dialog>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

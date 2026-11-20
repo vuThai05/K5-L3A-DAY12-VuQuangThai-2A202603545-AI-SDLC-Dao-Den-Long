@@ -1,0 +1,55 @@
+{
+  "verified_at": "2026-11-20T08:21:23.369Z",
+  "node": "v22.18.0",
+  "platform": "win32",
+  "results": [
+    {
+      "command": "node --test",
+      "status": 0
+    },
+    {
+      "command": "node --check src/main.js",
+      "status": 0
+    },
+    {
+      "command": "node scripts/build.js",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 3000 --snapshot-every 60 --scenario docs/proof/phase-1/win-scenario.json --inputs docs/proof/phase-1/win-inputs.json --out docs/proof/phase-1/win.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 3000 --snapshot-every 60 --scenario docs/proof/phase-1/win-scenario.json --inputs docs/proof/phase-1/win-inputs.json --out docs/proof/phase-1/win.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 600 --scenario docs/proof/phase-1/loss-scenario.json --inputs docs/proof/phase-1/loss-inputs.json --out docs/proof/phase-1/loss.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-1/pulse-scenario.json --inputs docs/proof/phase-1/pulse-inputs.json --out docs/proof/phase-1/pulse.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-1/dawn-scenario.json --inputs docs/proof/phase-1/dawn-inputs.json --out docs/proof/phase-1/dawn.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 900 --snapshot-every 120 --out docs/proof/phase-1/seeded.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 900 --snapshot-every 120 --out docs/proof/phase-1/seeded.jsonl",
+      "status": 0
+    }
+  ],
+  "deterministic_win_sha256": "190f3b78b8a6d75bf34dc805598f7f9739512cf4f62aa6d49e97de0f4d250e27",
+  "win": {
+    "type": "end",
+    "ticks": 1091,
+    "state": "won",
+    "score": 1712
+  },
+  "visual_verification": "Not yet performed. CLI tests do not verify WebGL or visual playability."
+}

@@ -1,4 +1,70 @@
-# Day 12 — AI SDLC: Đảo Đèn Lồng
+# Đảo Đèn Lồng — bản chơi Phase 1
+
+Game 3D góc nhìn thứ ba: cùng Mây gom đom đóm, thắp 5 đèn và tránh Bóng Mực trên Đảo Bến.
+Học viên: **Vũ Quang Thái · 2A202603545**. Video demo cuối bài sẽ bổ sung ở Phase 4.
+
+## Cài và chơi (Windows, macOS, Linux)
+
+Cần **Node.js 22 trở lên**, npm và trình duyệt có WebGL. Từ thư mục repo:
+
+```sh
+npm ci
+npm run build
+npm start
+```
+
+Mở **http://localhost:5173**, nhấn **Bắt đầu hành trình**. Sau khi cài dependency,
+bản game dùng tài nguyên cục bộ, không phụ thuộc CDN. `dist/` cũng có thể phục vụ bằng
+bất kỳ static server nào. Tắt server bằng Ctrl+C.
+
+| Điều khiển | Hành động |
+|---|---|
+| WASD / ↑ ↓ | Di chuyển theo hướng camera |
+| ← → / giữ chuột và kéo | Xoay camera |
+| Space | Nhảy |
+| E | Nạp đom đóm cho đèn gần nhất (trong 3 m) |
+| Q | Tỏa sáng: tốn 3 đom đóm, choáng Bóng Mực trong 7 m |
+| Nút ? | Hướng dẫn, tạm dừng |
+
+Nhặt đom đóm tự động trong 1.5 m, túi tối đa 20. Mỗi đèn cần 10 con, có thể nạp từng phần.
+Đèn sáng tạo vùng trú an toàn 5 m. Thắp cả 5 đèn trong 300 giây thì thắng;
+hết 3 ngọn lửa hoặc hết giờ thì thua. Có nút chơi lại. Chuyển tab sẽ tạm dừng.
+
+**Điểm:** mỗi lần nhặt +10, thắp đèn +100, mỗi Bóng Mực bị pulse làm choáng +20.
+Khi thắng cộng `floor(giây còn lại) × 2 + máu còn lại × 50`.
+Rơi đom đóm không trừ điểm; nhặt lại vẫn có điểm. Tất cả tuning thực tế ở [game.contract.json](game.contract.json).
+
+## Kiểm chứng và headless
+
+```sh
+npm run verify
+node src/headless.js --seed 12 --night 1 --ticks 900 --out run.jsonl --snapshot-every 60
+node src/headless.js --seed 12 --night 1 --scenario docs/proof/phase-1/win-scenario.json --inputs docs/proof/phase-1/win-inputs.json --ticks 3000 --out win.jsonl
+```
+
+Headless không cần cài Three.js hay mở trình duyệt. Nhận đủ `--scenario`, `--inputs`,
+`--ticks`, `--snapshot-every`; chạy 60 Hz, xuất JSONL snapshot/event/end theo Contract 1.0.
+Đọc thêm [giả định, kế hoạch và tiêu chí nghiệm thu](docs/phase-1.md),
+[báo cáo chạy thật](docs/proof/phase-1/report.json), [test output](docs/proof/phase-1/tests.tap).
+`verify` chạy test, build, scenario thắng/thua/pulse/hết giờ và so output hai lần chạy;
+lỗi ở bất kỳ bước nào sẽ dừng với mã lỗi. GitHub Actions chạy lại trên Ubuntu khi push/PR.
+
+**Giới hạn kiểm chứng:** test tự động xác nhận logic/CLI và HTTP/module của bản build.
+Chưa kiểm chứng hình ảnh WebGL, thao tác chơi thật, âm thanh hoặc FPS vì kết nối browser
+trong phiên Codex không khả dụng. Chưa chạy CI Ubuntu từ phiên này; không khẳng định hidden tests đã đạt.
+
+## Sáng tạo của tôi
+
+Đảo nổi giữa biển mây, lối đá nối năm đèn, nón lá có đèn nhỏ, hiệu ứng vòng sáng khi pulse,
+bản đồ nhỏ và âm thanh tổng hợp. Các phần trang trí chỉ ở renderer, không thêm thực thể gameplay
+hay đổi output headless. Bằng chứng logic giữ nguyên: browser và CLI cùng import `src/game.js`;
+`verify` so output CLI từng byte. Phần hình ảnh cần chơi thử trực tiếp.
+
+Nguồn và giấy phép: [CREDITS.md](CREDITS.md), [LICENSE](LICENSE).
+
+---
+
+# Tài liệu lab gốc: Day 12 — AI SDLC: Đảo Đèn Lồng
 
 > **Cá nhân** (1 người / 1 MSSV) · Áp dụng SDLC cùng AI để xây một **game 3D** qua **4 phase**, từ yêu cầu ban đầu tới bản phát hành.
 > **Lab board + trợ giảng:** **[Đảo Đèn Lồng Lab](https://claude.ai/artifact/Q1RYyv1dxjUczzCbd2ZnoW)**

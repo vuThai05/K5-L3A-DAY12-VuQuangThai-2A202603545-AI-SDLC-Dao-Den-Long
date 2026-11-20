@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: CLI tick model, snapshot schedule, input retention and byte determinism
+ok 1 - CLI tick model, snapshot schedule, input retention and byte determinism
+  ---
+  duration_ms: 742.1462
+  type: 'test'
+  ...
+# Subtest: CLI reports document errors on stderr and exits 2, output failure exits 1
+ok 2 - CLI reports document errors on stderr and exits 2, output failure exits 1
+  ---
+  duration_ms: 949.2324
+  type: 'test'
+  ...
+# Subtest: tick zero is scenario only: no input, points or events
+ok 3 - tick zero is scenario only: no input, points or events
+  ---
+  duration_ms: 5.2539
+  type: 'test'
+  ...
+# Subtest: camera movement formula, diagonal normalization, input retention, jump edge and landing
+ok 4 - camera movement formula, diagonal normalization, input retention, jump edge and landing
+  ---
+  duration_ms: 2.0652
+  type: 'test'
+  ...
+# Subtest: island boundary clamps horizontal movement without fall damage
+ok 5 - island boundary clamps horizontal movement without fall damage
+  ---
+  duration_ms: 5.3888
+  type: 'test'
+  ...
+# Subtest: pickup radius is inclusive in XZ, and capacity limits pickups
+ok 6 - pickup radius is inclusive in XZ, and capacity limits pickups
+  ---
+  duration_ms: 0.6695
+  type: 'test'
+  ...
+# Subtest: partial deposit requires rising edge and last lamp wins once with correct score
+ok 7 - partial deposit requires rising edge and last lamp wins once with correct score
+  ---
+  duration_ms: 1.2498
+  type: 'test'
+  ...
+# Subtest: out of range deposit and pulse with insufficient motes do nothing
+ok 8 - out of range deposit and pulse with insufficient motes do nothing
+  ---
+  duration_ms: 0.7391
+  type: 'test'
+  ...
+# Subtest: pulse costs motes, includes radius boundary, pushes, stuns and respects cooldown
+ok 9 - pulse costs motes, includes radius boundary, pushes, stuns and respects cooldown
+  ---
+  duration_ms: 2.3545
+  type: 'test'
+  ...
+# Subtest: shades chase, hit, drop correct quantity and honor invulnerability
+ok 10 - shades chase, hit, drop correct quantity and honor invulnerability
+  ---
+  duration_ms: 1.7974
+  type: 'test'
+  ...
+# Subtest: lit lamps repel shades and protect player
+ok 11 - lit lamps repel shades and protect player
+  ---
+  duration_ms: 5.0146
+  type: 'test'
+  ...
+# Subtest: dawn, zero health and exact fixed time bookkeeping
+ok 12 - dawn, zero health and exact fixed time bookkeeping
+  ---
+  duration_ms: 2.3307
+  type: 'test'
+  ...
+# Subtest: spawn flags disable random spawns; seeded game is reproducible with unique ids
+ok 13 - spawn flags disable random spawns; seeded game is reproducible with unique ids
+  ---
+  duration_ms: 63.4274
+  type: 'test'
+  ...
+# Subtest: scenario uses defaults, preserves other lamps and replaces entity lists
+ok 14 - scenario uses defaults, preserves other lamps and replaces entity lists
+  ---
+  duration_ms: 0.3846
+  type: 'test'
+  ...
+# Subtest: trust boundaries reject malformed documents
+ok 15 - trust boundaries reject malformed documents
+  ---
+  duration_ms: 3.4028
+  type: 'test'
+  ...
+# Subtest: web server serves the built game and local Three.js modules
+ok 16 - web server serves the built game and local Three.js modules
+  ---
+  duration_ms: 921.9131
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1948.2644
