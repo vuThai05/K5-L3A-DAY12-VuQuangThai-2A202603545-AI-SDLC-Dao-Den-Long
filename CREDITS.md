@@ -6,3 +6,4 @@
 - Nhạc nền đêm và hiệu ứng: sóng sine tổng hợp bằng Web Audio trong `src/audio.js`, không dùng bản ghi bên ngoài.
 - Công cụ AI: OpenAI Codex, kỹ năng Ponytail; hướng dẫn Sites cho preview cục bộ. Không cần API key để chơi hoặc chạy headless.
 - Phase 3: trạng thái dầu, luật bình minh, công thức điểm và bảng màu mù màu theo Ticket-03 của lab. Thanh dầu, vết rách giấy và mắt Bóng Mực được tạo bằng hình học/mã; không dùng asset ngoài.
+- Phase 4: benchmark/soak/leaderboard/accessibility theo Ticket-04. Hiển thị chuẩn dùng instancing của Three.js; không có model, font hoặc âm thanh ngoài bổ sung. Đóng gói ZIP dùng Python standard library. Ảnh/video thực tế do học viên tự cung cấp sau chơi thử.

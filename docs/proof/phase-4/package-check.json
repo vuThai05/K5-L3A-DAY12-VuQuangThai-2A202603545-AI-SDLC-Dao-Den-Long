@@ -1,0 +1,8 @@
+{
+  "verified_at": "2026-11-20T10:00:17.172Z",
+  "package": "dao-den-long-v1.0.0.zip",
+  "dependencies_installed_in_extracted_folder": false,
+  "headless": "passed",
+  "static_http_modules": "passed",
+  "browser_opened": false
+}

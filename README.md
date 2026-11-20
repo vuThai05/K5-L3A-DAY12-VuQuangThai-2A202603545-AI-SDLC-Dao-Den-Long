@@ -1,12 +1,16 @@
-# Đảo Đèn Lồng — bản chơi Phase 3
+# Đảo Đèn Lồng — v1.0.0 (Phase 4)
 
-Game 3D góc nhìn thứ ba: cùng Mây đi qua **Đảo Bến → Đảo Cau → Đảo Chuông**, gom đom đóm,
-giữ đèn sáng tới Bình Minh. Phase 3 thực hiện Ticket-03 **“Đèn cạn dầu”** / Test Contract **1.2**.
-Học viên: **Vũ Quang Thái · 2A202603545**. Video demo cuối bài sẽ bổ sung ở Phase 4.
+Game 3D góc nhìn thứ ba: cùng Mây qua **Đảo Bến → Đảo Cau → Đảo Chuông**, gom đom đóm và giữ đèn sáng tới bình minh.
+Contract **1.3** giữ nguyên gameplay “Đèn cạn dầu” của Phase 3, thêm benchmark/soak, top 10 và accessibility.
+Học viên: **Vũ Quang Thái · 2A202603545**.
 
-## Cài và chơi (Windows, macOS, Linux)
+**Ảnh/GIF và video demo:** chờ học viên tự chơi thử, bổ sung theo [checklist](docs/manual-test.md).
+Không chạy preview hoặc tạo ảnh/video giả. Release được chuẩn bị ở trạng thái **draft** cho tới khi có bằng chứng trực tiếp.
 
-Cần **Node.js 22 trở lên**, npm và trình duyệt có WebGL. Từ thư mục repo:
+## Cài và chơi
+
+Cần **Node.js 22+**, npm và trình duyệt desktop **WebGL2** (Chrome/Edge/Firefox), bật tăng tốc phần cứng.
+Độ phân giải tham chiếu 1280×720, bàn phím/chuột. Từ thư mục clone sạch, tối đa 3 lệnh:
 
 ```sh
 npm ci
@@ -14,74 +18,104 @@ npm run build
 npm start
 ```
 
-Mở **http://localhost:5173**, nhấn **Bắt đầu hành trình**. Sau khi cài dependency,
-bản game dùng tài nguyên cục bộ, không phụ thuộc CDN. `dist/` cũng có thể phục vụ bằng
-bất kỳ static server nào. Tắt server bằng Ctrl+C.
+Mở **http://localhost:5173**, nhấn Bắt đầu hành trình. Tài nguyên được đóng gói cục bộ, không cần CDN.
+Tắt server bằng Ctrl+C. Gói ZIP đã build: giải nén, vào thư mục `dao-den-long-v1.0.0`,
+chạy **`node scripts/serve.js`**; không cần npm install để chơi gói này. `dist/` cũng host tĩnh được.
 
-| Điều khiển | Hành động |
+| Phím mặc định | Hành động |
 |---|---|
-| WASD / ↑ ↓ | Di chuyển theo hướng camera |
+| WASD / ↑ ↓ | Di chuyển theo camera |
 | ← → / giữ chuột và kéo | Xoay camera |
 | Space | Nhảy |
 | Shift | Lướt 14 m/s trong 0.2 s, hồi 1.5 s |
-| E | Thắp mới, thắp lại hoặc châm dầu cho đèn nhận được gần nhất (trong 2 m) |
-| Q | Tỏa sáng: tốn 3 đom đóm, bán kính 3D 5 m, hồi 3 s |
-| P / Esc | Tạm dừng: tiếp tục, chơi lại đêm, cài đặt, về menu |
-| Nút ? / ⚙ | Hướng dẫn / âm lượng, độ nhạy chuột và bảng màu dễ phân biệt (được lưu) |
+| E | Thắp mới/thắp lại/châm dầu cho đèn nhận được gần nhất trong 2 m |
+| Q | Tỏa sáng: tốn 3 con, bán kính 3D 5 m, hồi 3 s |
+| P / Esc | Pause: tiếp tục/chơi lại/cài đặt/lưu ảnh/về menu |
+| ? / ⚙ | Hướng dẫn / cài đặt âm thanh, chuột, mù màu, giảm chuyển động, chữ lớn và đổi phím |
 
-Nhặt tự động trong 1 m và chênh cao ≤1.5 m. Túi bắt đầu 10, mỗi lần thắp thành công (kể cả thắp lại)
-tăng 2, tối đa 20. Thắp mới cần 10 đom đóm; đèn đã từng sáng chỉ cần 5 để thắp lại. Nạp từng phần được.
+Mọi hành động trong bảng phím chính đổi được; phát hiện trùng phím, có khôi phục mặc định và lưu cài đặt.
+Chữ UI tối thiểu 18 px, tùy chọn lớn ×1.25. Có phụ đề/chỉ báo cho spawn Bóng Mực (mũi tên), gió, 10 giây cuối và đèn yếu.
 
-Đèn vừa thắp có 100 dầu, hao 1/giây. Đèn sáng nhận châm dầu, mỗi đom đóm thêm 10, tối đa 100.
-Dưới 30 dầu mất vùng an toàn 6 m, đèn và thanh dầu nhấp nháy 1 Hz; Bóng Mực có thể tới hút thêm 5 dầu/giây/con.
-Hết dầu đèn tắt và mất tiến độ nạp. Đèn tắt xẹp 20% và có vết rách để phân biệt bằng hình dáng.
+Nhặt tự động trong 1 m, chênh cao ≤1.5 m. Túi bắt đầu 10, mỗi lần thắp thành công +2, tối đa 20.
+Thắp mới cần 10 con, thắp lại cần 5; nạp từng phần được. Đèn có 100 dầu, hao 1/giây, châm 10 dầu/con.
+Dưới 30 dầu mất vùng an toàn 6 m, đèn/thanh dầu nhấp nháy 1 Hz. Bóng Mực hút thêm 5 dầu/giây/con.
+Đèn tắt xẹp 20% và có vết rách; mù màu đổi viền/mắt Bóng sang xanh lam, cảnh báo trắng kèm ⚠.
 
-Ba đêm có 5/6/7 đèn, kéo dài **240/270/300 giây**. **Không thắng sớm khi thắp đủ đèn**:
-Mây phải còn sống và giữ ít nhất **3/5, 4/6, 5/7 đèn sáng ở tick bình minh**.
-Hết 3 Ngọn Lửa thua ngay; hết giờ thiếu đèn cũng thua. Được chơi lại đúng đêm đó, giữ điểm những đêm đã thắng.
-Đảo Cau có cầu tre không lan can và bục phóng. Đảo Chuông có ba tầng, dốc, bục phóng và gió báo trước.
-Gió Lạc cướp đom đóm; pulse vào nó khi mang đồ để lấy lại. Bùa Gió cho chạy 7.2 m/s và lướt không hồi trong 10 s.
-Rơi xuống dưới Y=-10 mất một lửa và cả túi, hồi sinh sau 1 s. Chuyển tab sẽ tạm dừng.
+Ba đêm có 5/6/7 đèn, dài **240/270/300 s**. Không thắng sớm: còn sống và giữ ít nhất **3/5, 4/6, 5/7 đèn sáng ở tick bình minh**.
+Hết 3 lửa thua ngay; được retry đêm đó. Cầu/bục phóng, ba tầng/dốc/tháp/gió giữ bản đồ chuẩn.
+Gió Lạc cướp đồ, pulse lần nữa khi nó mang đồ để lấy lại; Bùa Gió cho chạy nhanh và lướt không hồi 10 s.
 
-**Điểm mới:** mỗi đom đóm nạp/châm +5, thắp lần đầu +100, thắp lại +40.
-Mỗi Bóng Mực trúng pulse +5; nếu nó đang hút dầu thì tổng +15.
-Khi thắng cộng `50 + floor(dầu)` cho mỗi đèn còn sáng và `50 × số Ngọn Lửa còn lại`; bỏ thưởng thời gian.
-Nhặt không cộng điểm. Tổng game chỉ cộng các đêm đã thắng. Tuning ở [game.contract.json](game.contract.json).
-Trong cài đặt, **Bảng màu dễ phân biệt** đổi viền/mắt Bóng Mực sang xanh lam, cảnh báo trắng kèm ⚠.
+Điểm: nạp/châm +5/con; thắp mới +100, lại +40; pulse +5/Bóng, tổng +15 nếu nó đang drain.
+Thắng cộng 50+floor(dầu) mỗi đèn sáng và 50/lửa. Tổng game chỉ gồm các đêm đã thắng.
 
-## Kiểm chứng và headless
+## Bảng điểm và export
+
+Thua hoặc thắng Đêm 3 cho nhập tên 3–12 ký tự `[A-Za-z0-9_]`; lưu tổng điểm đã thắng, số đêm thắng, ISO timestamp và seed.
+Top 10 xếp điểm giảm dần, hòa điểm thì thời điểm sớm hơn. Menu có Bảng xếp hạng.
+Node server lưu `data/leaderboard.json` (gitignored); đặt `LANTERN_DATA_DIR` để đổi thư mục.
+Host thuần tĩnh dùng localStorage và nút Xuất JSON. CLI export đọc datastore Node server:
+
+```sh
+node scripts/serve.js --export-leaderboard out.json
+```
+
+## Kiểm thử / headless
 
 ```sh
 npm run verify
 node src/headless.js --seed 12 --night 1 --ticks 900 --out run.jsonl --snapshot-every 60
-node src/headless.js --seed 12 --night 3 --ticks 18000 --scenario docs/proof/phase-3/benchmark-scenario.json --out night3.jsonl
+node src/headless.js --seed 12 --night 3 --ticks 18000 --scenario docs/proof/phase-4/benchmark-scenario.json --out night3.jsonl
 ```
 
-Headless không cần cài Three.js hay mở trình duyệt. Nhận đủ `--scenario`, `--inputs`,
-`--ticks`, `--snapshot-every`; `--night` nhận 1, 2 hoặc 3. Xuất JSONL snapshot/event/end theo Contract 1.2.
-Input gồm dash/pause ở cạnh nhấn; pause giữ nguyên sim_tick, đồng hồ và toàn bộ timer nhưng tick vẫn tăng.
-Snapshot thêm dầu/lịch sử đèn, capacity và trạng thái drain; scenario hỗ trợ fuel/ever_lit/successful_lights/target_lantern_id.
-Đọc [ghi chép Phase 3](docs/phase-3.md), [ADR về trạng thái đèn và thắng](docs/adr-003-fuel-and-dawn.md),
-[breaking changes](CHANGELOG.md), [báo cáo chạy thật](docs/proof/phase-3/report.json), [test output](docs/proof/phase-3/tests.tap).
-`verify` chạy test, build, scenario bình minh, dầu/thắp lại/châm/hút, so output cả ba đêm từng byte và benchmark 18.000 tick;
-lỗi ở bất kỳ bước nào sẽ dừng với mã lỗi. GitHub Actions chạy lại trên Ubuntu khi push/PR.
-Giữ bằng chứng lịch sử [Phase 1](docs/proof/phase-1/report.json), [Phase 2](docs/proof/phase-2/report.json).
-Các test bị thay luật có lý do trong changelog; không skip âm thầm.
+Headless không cần GPU/Three.js. `--night` nhận 1/2/3, hỗ trợ scenario/inputs/ticks/snapshot-every;
+60 Hz, JSONL snapshot/event/end; pause tăng tick nhưng giữ sim_tick/timer.
+`verify` chạy test, build, scenario dầu/bình minh, so output ba đêm, so gameplay với Phase 3 và soak thật.
+CI Ubuntu chạy cùng lệnh. [Báo cáo](docs/proof/phase-4/report.json), [test output](docs/proof/phase-4/tests.tap), [soak](docs/proof/phase-4/soak.json).
 
-**Giới hạn kiểm chứng:** test tự động xác nhận logic/CLI, HTTP/module và các handler UI với DOM giả lập.
-DOM giả lập không xác nhận hình ảnh, âm thanh hay cảm giác chơi. Theo yêu cầu, học viên tự test preview;
-Codex không tiếp tục preview. Benchmark ghi rõ cấu hình/tình huống trong report. Chưa có kết quả CI Ubuntu trong phiên này;
-không khẳng định hidden tests hoặc FPS đã đạt.
+## GPU benchmark và soak
 
-## Sáng tạo của tôi
+```sh
+npm run bench -- --seed 42 --duration 30 --out docs/proof/phase-4/bench.json
+npm run soak -- --seed 7 --nights 10 --out docs/proof/phase-4/soak.json
+```
 
-Đảo nổi giữa biển mây, nón lá có đèn nhỏ, hiệu ứng vòng sáng khi pulse, lá bay trước gió,
-bản đồ nhỏ và nhạc/âm thanh tổng hợp. Bản đồ theo Ticket-02, bảng màu điều chỉnh theo chế độ mù màu của Ticket-03.
-Các phần trang trí chỉ ở renderer, không thêm thực thể gameplay
-hay đổi output headless. Bằng chứng logic giữ nguyên: browser và CLI cùng import `src/game.js`;
-`verify` so output CLI từng byte. Phần hình ảnh cần chơi thử trực tiếp.
+Benchmark **mở cửa sổ Chrome/Edge 1280×720**, render pixel ratio 1. Giữ cửa sổ hiện trước, không tương tác.
+Không tìm thấy browser thì thêm `--browser <đường-dẫn-executable>`. Warmup 3 s, rồi đo 30 s; tự ghi file và thoát.
+Cảnh chuẩn có 200 wander, 100 motes, L1–L3 fuel100; tắt spawn/hit/pickup/decay/end, camera bán kính30/Y15, vòng15s.
+P95 dùng nearest rank, p1-low đúng trung bình 1% frame chậm nhất; lấy dt thực, không suy từ headless.
+Browser không bảo đảm tắt vsync: `vsync_off=false`. Web không đo RSS toàn browser đáng tin cậy: `peak_mem_mb=null`.
+Ngưỡng máy chấm: avg_fps≥60, p1_low_fps≥30, load_ms≤10000. **Chưa đo GPU theo yêu cầu không mở preview.**
 
-Nguồn và giấy phép: [CREDITS.md](CREDITS.md), [LICENSE](LICENSE).
+Soak cùng một tiến trình, đêm 1→2→3, i=1..10 dùng seed gốc+i, input seeded đúng xác suất Ticket-04.
+Đo RSS sau tải đêm đầu và reset đêm cuối. CLI dùng JITless/GC, old heap32 MiB/young semi-space1 MiB để giới hạn bộ nhớ thực.
+Lượt đầu vượt 20% được giữ tại [soak trước điều chỉnh](docs/proof/phase-4/soak-before-tuning.json).
+Ngưỡng: 0 crash, RSS cuối≤1.2×đầu. Các kết quả mất đêm trong soak là hợp lệ, không phải crash.
+
+## Đóng gói và phát hành
+
+```sh
+npm run package
+npm run check-package
+```
+
+Packager cần Python 3 (chỉ lúc tạo ZIP). Sinh `release/dao-den-long-v1.0.0.zip` và manifest SHA256;
+check-package giải nén thư mục sạch, chạy headless/HTTP mà không cài node_modules và không mở browser.
+Sau khi review manifest/notes, `node scripts/publish-release.js` đẩy các tag và tạo GitHub **draft** v1.0.0 bằng credential Git sẵn có.
+Script không mở đăng nhập, không ghi token vào file, không xóa asset cũ. Thiếu credential thì báo lỗi để người dùng đăng nhập bằng Git Credential Manager.
+
+**Còn cần trước khi phát hành public đầy đủ:** tự chạy GPU benchmark, thêm ảnh/GIF và video MP4 dưới 5 phút,
+commit bằng chứng, build lại ZIP và kiểm tra trực tiếp. Xem [checklist](docs/manual-test.md), [release notes](docs/release-notes.md), [retro](docs/retro.md).
+Test/DOM stub không chứng minh hình ảnh/âm thanh/FPS; không khẳng định hidden tests đạt.
+
+## Tài liệu và sáng tạo
+
+[Contract](game.contract.json) · [Phase 4](docs/phase-4.md) · [Changelog](CHANGELOG.md) · [ADR nhiên liệu](docs/adr-003-fuel-and-dawn.md)
+· [Credits](CREDITS.md) · [License](LICENSE). Bằng chứng Phase 1/2/3 được giữ nguyên trong docs/proof/.
+
+Đảo nổi/biển mây, nón lá treo đèn, vòng sáng, lá báo gió, minimap và nhạc sine là phần thể hiện riêng.
+Benchmark tắt mây/lá trang trí thêm; dùng cùng renderer/ánh sáng/game map, instancing cho các thực thể chuẩn.
+Không thêm thực thể gameplay ngoài contract và không thay output headless bởi trang trí.
+
 
 ---
 

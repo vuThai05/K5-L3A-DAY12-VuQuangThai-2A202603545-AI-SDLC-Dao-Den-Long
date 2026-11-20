@@ -1,8 +1,8 @@
 import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
 await mkdir('dist/src', { recursive: true });
 await mkdir('dist/vendor', { recursive: true });
-for (const file of ['index.html', 'style.css']) await copyFile(file, `dist/${file}`);
-for (const file of ['game.js', 'main.js', 'levels.js', 'validation.js', 'scene.js', 'audio.js']) await copyFile(`src/${file}`, `dist/src/${file}`);
+for (const file of ['index.html', 'benchmark.html', 'style.css']) await copyFile(file, `dist/${file}`);
+for (const file of ['game.js', 'main.js', 'levels.js', 'validation.js', 'scene.js', 'audio.js', 'controls.js', 'leaderboard.js', 'benchmark.js', 'benchmark-client.js']) await copyFile(`src/${file}`, `dist/src/${file}`);
 const { tuning } = JSON.parse(await readFile('game.contract.json', 'utf8'));
 await writeFile('dist/src/config.js', `export const tuning = ${JSON.stringify(tuning)};\n`);
 for (const file of ['three.module.js', 'three.core.js']) await copyFile(`node_modules/three/build/${file}`, `dist/vendor/${file}`);

@@ -1,0 +1,5 @@
+{
+  "status": "awaiting_user_run",
+  "reason": "User explicitly requested no preview; a real GPU window is required for frame metrics.",
+  "command": "npm run bench -- --seed 42 --duration 30 --out docs/proof/phase-4/bench.json"
+}

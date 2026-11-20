@@ -132,6 +132,15 @@ export class Game {
     this.repelShade(s);
     return h !== null && h <= feet[1] + .15;
   }
+  moveWanderShade(s) {
+    const weak = this.lanterns.filter(l => l.lit && !this.protects(l));
+    const targets = weak.length ? weak : this.lanterns.filter(l => !l.lit);
+    const target = targets.sort((a, b) => dXZ(s.pos, a.pos) - dXZ(s.pos, b.pos) || idOrder(a, b))[0];
+    s.target_lantern_id = target?.id ?? null;
+    const isWeak = target?.lit && !this.protects(target);
+    if (!(isWeak && dXZ(s.pos, target.pos) <= 2)) this.moveShade(s, target ? direction(s.pos, target.pos) : s.dir, 2 / HZ);
+    if (isWeak && dXZ(s.pos, target.pos) <= 2) { s.state = 'drain'; s.drainTicks = 0; }
+  }
   movePlayer(pressed) {
     const p = this.player, old = [...p.pos];
     let [x, z] = this.input.move, len = Math.hypot(x, z); if (len > 1) { x /= len; z /= len; }
@@ -248,15 +257,7 @@ export class Game {
       if (s.state === 'chase' && distance > 18) s.state = 'wander';
       if (s.state === 'wander' && distance <= 12) s.state = 'chase';
       if (s.state === 'chase') { s.target_lantern_id = null; this.moveShade(s, direction(s.pos, p.pos), this.level.shadeSpeed / HZ); }
-      else {
-        const weak = this.lanterns.filter(l => l.lit && !this.protects(l));
-        const targets = weak.length ? weak : this.lanterns.filter(l => !l.lit);
-        const target = targets.sort((a, b) => dXZ(s.pos, a.pos) - dXZ(s.pos, b.pos) || idOrder(a, b))[0];
-        s.target_lantern_id = target?.id ?? null;
-        const isWeak = target?.lit && !this.protects(target);
-        if (!(isWeak && dXZ(s.pos, target.pos) <= 2)) this.moveShade(s, target ? direction(s.pos, target.pos) : s.dir, 2 / HZ);
-        if (isWeak && dXZ(s.pos, target.pos) <= 2) { s.state = 'drain'; s.drainTicks = 0; }
-      }
+      else this.moveWanderShade(s);
     }
     for (const d of this.drifters) {
       if (d.state === 'removed') continue;

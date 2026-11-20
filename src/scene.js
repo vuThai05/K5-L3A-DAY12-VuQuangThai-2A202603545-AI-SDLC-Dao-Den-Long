@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { PALETTE as C, groundAt } from './levels.js';
+import { benchmarkCamera } from './benchmark.js';
 
-export function createScene(canvas) {
+export function createScene(canvas, options = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5)); renderer.shadowMap.enabled = true;
+  renderer.setPixelRatio(options.benchmark ? 1 : Math.min(devicePixelRatio, 1.5)); renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.5;
   const scene = new THREE.Scene(); scene.background = new THREE.Color(C.sky); scene.fog = new THREE.FogExp2(C.fog, .006);
@@ -14,21 +15,28 @@ export function createScene(canvas) {
   const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: .8, ...extra });
   const materials = { grass: mat(C.grass), sand: mat(C.sand), wood: mat(C.wood), gold: mat(C.gold), clouds: mat(C.clouds, { transparent: true, opacity: .45 }),
     coat: mat(C.coat), red: mat(C.red), shade: mat(C.shade), stunned: mat(C.stunned), rim: new THREE.MeshBasicMaterial({ color: C.edge, wireframe: true, transparent: true, opacity: .3 }), eyes: new THREE.MeshBasicMaterial({ color: C.edge }), drifter: mat(C.drifter),
-    mote: new THREE.MeshBasicMaterial({ color: C.mote }), halo: new THREE.MeshBasicMaterial({ color: C.halo, transparent: true, opacity: .15, depthWrite: false }) };
-  let staticGroup, entityGroup, level, player, pulseRing, leaves, flash = 10;
-  const lamps = new Map(), motes = new Map(), shades = new Map(), drifters = new Map(), charms = new Map(), legs = [];
+    shadeInstances: mat('#ffffff'), mote: new THREE.MeshBasicMaterial({ color: C.mote }), halo: new THREE.MeshBasicMaterial({ color: C.halo, transparent: true, opacity: .15, depthWrite: false }) };
+  let staticGroup, entityGroup, level, player, pulseRing, leaves, flash = 10, reducedMotion = false;
+  let moteBatch, haloBatch, shadeBatch, rimBatch, eyeBatch;
+  const lamps = new Map(), drifters = new Map(), charms = new Map(), legs = [];
   const mesh = (geometry, material, parent, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(geometry, material); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m; };
-  const sphere = new THREE.SphereGeometry(.13, 8, 6), shadeGeo = new THREE.SphereGeometry(.65, 12, 10);
+  const sphere = new THREE.SphereGeometry(.13, 8, 6), shadeGeo = new THREE.SphereGeometry(.65, 12, 10), haloGeo = new THREE.SphereGeometry(.29, 8, 6), eyeGeo = new THREE.SphereGeometry(.07, 8, 6);
+  const dummy = new THREE.Object3D(), eyePos = new THREE.Vector3(), rootMatrix = new THREE.Matrix4(), normalColor = new THREE.Color(C.shade), stunnedColor = new THREE.Color(C.stunned);
+  // ponytail: standard scene tops out at 200 shades/100 motes; grow instance capacity if a future contract exceeds 512.
+  function batch(geometry, material, capacity = 512) { const m = new THREE.InstancedMesh(geometry, material, capacity); m.count = 0; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled = false; m.castShadow = true; entityGroup.add(m); return m; }
   const uniqueGeometries = new Set(), uniqueMaterials = new Set();
   function clear() {
     if (staticGroup) {
+      entityGroup.traverse(o => { if (o.isInstancedMesh) o.dispose(); });
       for (const group of [staticGroup, entityGroup]) group.traverse(o => { if (o.isMesh || o.isLine) { uniqueGeometries.add(o.geometry); if (!Object.values(materials).includes(o.material)) uniqueMaterials.add(o.material); } });
-      for (const g of uniqueGeometries) if (![sphere, shadeGeo].includes(g)) g.dispose();
+      for (const g of uniqueGeometries) if (![sphere, shadeGeo, haloGeo, eyeGeo].includes(g)) g.dispose();
       for (const m of uniqueMaterials) m.dispose(); uniqueGeometries.clear(); uniqueMaterials.clear();
       scene.remove(staticGroup, entityGroup);
     }
-    for (const map of [lamps, motes, shades, drifters, charms]) map.clear(); legs.length = 0;
+    for (const map of [lamps, drifters, charms]) map.clear(); legs.length = 0;
     staticGroup = new THREE.Group(); entityGroup = new THREE.Group(); scene.add(staticGroup, entityGroup);
+    moteBatch = batch(sphere, materials.mote); haloBatch = batch(haloGeo, materials.halo); haloBatch.castShadow = false;
+    shadeBatch = batch(shadeGeo, materials.shadeInstances); rimBatch = batch(shadeGeo, materials.rim); rimBatch.castShadow = false; eyeBatch = batch(eyeGeo, materials.eyes, 1024);
   }
   function load(game) {
     clear(); level = game.level;
@@ -41,7 +49,7 @@ export function createScene(canvas) {
         const tree = new THREE.Group(); tree.position.set(x, h, z); staticGroup.add(tree);
         mesh(new THREE.CylinderGeometry(.17, .28, 2, 6), materials.wood, tree, 0, 1);
         for (let j = 0; j < 3; j++) mesh(new THREE.ConeGeometry(1.4 - j * .25, 2, 7), materials.grass, tree, 0, 2 + j * .8);
-        const cloud = mesh(new THREE.IcosahedronGeometry(5, 1), materials.clouds, staticGroup, cx + Math.cos(a) * (r + 14), -10, cz + Math.sin(a) * (r + 14)); cloud.scale.set(2, .4, 1); cloud.castShadow = false;
+        if (!options.benchmark) { const cloud = mesh(new THREE.IcosahedronGeometry(5, 1), materials.clouds, staticGroup, cx + Math.cos(a) * (r + 14), -10, cz + Math.sin(a) * (r + 14)); cloud.scale.set(2, .4, 1); cloud.castShadow = false; }
       }
     }
     if (level.night === 2) {
@@ -115,22 +123,33 @@ export function createScene(canvas) {
       v.fuelBar.visible = l.lit; v.fuelBar.quaternion.copy(camera.quaternion);
       v.fuelFill.scale.x = fraction; v.fuelFill.position.x = -.7 + fraction * .7; v.fuelFill.material.opacity = blink;
     }
-    player.position.fromArray(game.player.pos); player.rotation.y = Math.atan2(game.facing[0], game.facing[1]); player.visible = !game.respawnTicks && (!game.invuln || Math.floor(time * 12) % 2 === 0);
+    player.position.fromArray(game.player.pos); player.rotation.y = Math.atan2(game.facing[0], game.facing[1]); player.visible = !game.respawnTicks && (reducedMotion || !game.invuln || Math.floor(time * 12) % 2 === 0);
     const moving = game.state === 'playing' && Math.hypot(game.player.vel[0], game.player.vel[2]) > .01;
     legs.forEach((l, i) => l.rotation.x = moving ? Math.sin(time * 13 + i * Math.PI) * .7 : 0);
-    syncList(game.motes, motes, () => { const g = new THREE.Group(); mesh(sphere, materials.mote, g); mesh(new THREE.SphereGeometry(.29, 8, 6), materials.halo, g); entityGroup.add(g); return g; }, (v, m) => { v.position.set(m.pos[0], m.pos[1] + .55 + Math.sin(time * 3 + m.pos[0]) * .15, m.pos[2]); });
-    syncList(game.shades, shades, () => { const g = new THREE.Group(); mesh(shadeGeo, materials.shade, g).scale.y = 1.2; mesh(shadeGeo, materials.rim, g).scale.set(1.05, 1.25, 1.05); for (const side of [-1, 1]) mesh(new THREE.SphereGeometry(.07, 8, 6), materials.eyes, g, side * .2, .15, .56); entityGroup.add(g); return g; }, (v, s) => { v.position.fromArray(s.pos); v.rotation.y = Math.atan2(game.player.pos[0] - s.pos[0], game.player.pos[2] - s.pos[2]); v.children[0].material = s.state === 'stunned' ? materials.stunned : materials.shade; v.scale.setScalar(s.state === 'spawning' ? .6 : 1); });
+    if (game.motes.length > 512 || game.shades.length > 512) throw new Error('Render instance capacity exceeded');
+    moteBatch.count = haloBatch.count = game.motes.length;
+    game.motes.forEach((m, i) => { dummy.position.set(m.pos[0], m.pos[1] + .55 + (reducedMotion ? 0 : Math.sin(time * 3 + m.pos[0]) * .15), m.pos[2]); dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(1); dummy.updateMatrix(); moteBatch.setMatrixAt(i, dummy.matrix); haloBatch.setMatrixAt(i, dummy.matrix); });
+    shadeBatch.count = rimBatch.count = game.shades.length; eyeBatch.count = game.shades.length * 2;
+    game.shades.forEach((s, i) => {
+      const scale = s.state === 'spawning' ? .6 : 1; dummy.position.fromArray(s.pos); dummy.rotation.set(0, Math.atan2(game.player.pos[0] - s.pos[0], game.player.pos[2] - s.pos[2]), 0); dummy.scale.set(scale, scale, scale); dummy.updateMatrix(); rootMatrix.copy(dummy.matrix);
+      dummy.scale.set(scale, scale * 1.2, scale); dummy.updateMatrix(); shadeBatch.setMatrixAt(i, dummy.matrix); shadeBatch.setColorAt(i, s.state === 'stunned' ? stunnedColor : normalColor);
+      dummy.scale.set(scale * 1.05, scale * 1.25, scale * 1.05); dummy.updateMatrix(); rimBatch.setMatrixAt(i, dummy.matrix);
+      for (const [j, side] of [[0, -1], [1, 1]]) { eyePos.set(side * .2, .15, .56).applyMatrix4(rootMatrix); dummy.position.copy(eyePos); dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(scale); dummy.updateMatrix(); eyeBatch.setMatrixAt(i * 2 + j, dummy.matrix); }
+    });
+    for (const m of [moteBatch, haloBatch, shadeBatch, rimBatch, eyeBatch]) m.instanceMatrix.needsUpdate = true;
+    if (shadeBatch.instanceColor) shadeBatch.instanceColor.needsUpdate = true;
     syncList(game.drifters.filter(d => d.state !== 'removed'), drifters, () => { const g = new THREE.Group(); for (let i = 0; i < 6; i++) mesh(new THREE.SphereGeometry(.25, 6, 4), materials.drifter, g, 0, 0, -i * .3).scale.set(1, .25, 1); entityGroup.add(g); return g; }, (v, d) => { v.position.fromArray(d.pos); v.rotation.y = Math.atan2(d.dir[0], d.dir[1]); v.children.forEach((p, i) => p.position.y = Math.sin(time * 5 + i) * .2); });
     syncList(game.charms, charms, () => { const g = new THREE.Group(); mesh(new THREE.BoxGeometry(.5, .8, .05), materials.gold, g); mesh(new THREE.BoxGeometry(.42, .7, .06), materials.red, g, 0, 0, .02); entityGroup.add(g); return g; }, (v, c) => { v.position.set(c.pos[0], c.pos[1] + .8 + Math.sin(time * 2) * .1, c.pos[2]); v.visible = c.available; v.rotation.y = time * .5; });
-    pulseRing.material.opacity = Math.max(0, .7 * (1 - flash / .6)); pulseRing.scale.setScalar(.1 + Math.min(1, flash / .6) * 5);
-    leaves.visible = game.wind.warning || game.wind.active;
+    pulseRing.material.opacity = reducedMotion ? 0 : Math.max(0, .7 * (1 - flash / .6)); pulseRing.scale.setScalar(.1 + Math.min(1, flash / .6) * 5);
+    leaves.visible = !options.benchmark && !reducedMotion && (game.wind.warning || game.wind.active);
     leaves.position.fromArray(game.player.pos);
     leaves.children.forEach((leaf, i) => { leaf.position.set(Math.sin(time * 2 + i) * 4, 1 + ((time + i) % 3), Math.cos(time * 2 + i) * 4); leaf.rotation.set(time, i + time * 2, time * 3); });
-    if (overview) { const cx = game.night === 2 ? 35 : 0, scale = game.night === 2 ? 1.4 : 1; camera.position.set(cx + 48 * scale * Math.sin(.5 + time * .01), 39 * scale, 48 * scale * Math.cos(.5 + time * .01)); camera.lookAt(cx - 8, 0, 0); }
+    if (options.benchmark) { camera.position.fromArray(benchmarkCamera(time)); camera.lookAt(0, 0, 0); }
+    else if (overview) { const cx = game.night === 2 ? 35 : 0, scale = game.night === 2 ? 1.4 : 1, orbit = reducedMotion ? .5 : .5 + time * .01; camera.position.set(cx + 48 * scale * Math.sin(orbit), 39 * scale, 48 * scale * Math.cos(orbit)); camera.lookAt(cx - 8, 0, 0); }
     else { const a = yaw * Math.PI / 180, p = game.player.pos, y = Math.max(-2, p[1]); camera.position.lerp(new THREE.Vector3(p[0] - Math.sin(a) * 11, y + 7, p[2] - Math.cos(a) * 11), 1 - Math.exp(-dt * 8)); camera.lookAt(p[0], y + 1, p[2]); }
     renderer.render(scene, camera);
   }
-  function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); }
+  function resize() { const width = options.benchmark ? 1280 : innerWidth, height = options.benchmark ? 720 : innerHeight; camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height); }
   resize(); addEventListener('resize', resize);
-  return { load, update, setColorblind(enabled) { const color = enabled ? '#00B3FF' : C.edge; materials.rim.color.set(color); materials.eyes.color.set(color); }, pulse(pos) { flash = 0; pulseRing.position.set(pos[0], pos[1] + .12, pos[2]); }, project(pos) { return new THREE.Vector3(...pos).project(camera); } };
+  return { load, update, capture() { renderer.render(scene, camera); return canvas.toDataURL('image/png'); }, setReducedMotion(enabled) { reducedMotion = enabled; }, setColorblind(enabled) { const color = enabled ? '#00B3FF' : C.edge; materials.rim.color.set(color); materials.eyes.color.set(color); }, pulse(pos) { flash = 0; pulseRing.position.set(pos[0], pos[1] + .12, pos[2]); }, project(pos) { return new THREE.Vector3(...pos).project(camera); } };
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## Phase 4 — Contract 1.3 / v1.0.0 draft
+
+- Giữ nguyên output gameplay của Phase 3 và so sánh từng byte trong verify.
+- Thêm benchmark có cửa sổ chuẩn, camera/200 wander/100 motes, warmup và frame metrics đúng công thức. Chưa chạy GPU theo yêu cầu người dùng; không tạo bench.json giả.
+- Soak 10 đêm cùng tiến trình, seed/input đúng ticket, RSS/crash thật; giữ cả report vượt 20% trước khi chỉnh runtime memory.
+- Leaderboard top10 disk, atomic/serialized writes, browser fallback, tên chuẩn và CLI export.
+- Đổi 9 phím, phát hiện trùng/reset/lưu; phụ đề/mũi tên spawn, gió/đèn yếu/10s, reduced motion, font18px/large125%.
+- Instancing đom đóm và thân/viền/mắt Bóng Mực, giải phóng instance buffers khi reset; không đổi simulation.
+- Gói web offline + Node CLI, kiểm tra giải nén sạch; retro và công cụ tạo GitHub draft Release. Ảnh/video/FPS và công bố public còn chờ người dùng tự test.
+
 ## Phase 3 — Contract 1.2 (breaking changes)
 
 - Đèn hao 1 fuel/s và tắt; thêm fuel/ever_lit/relit_count, lantern_out.
