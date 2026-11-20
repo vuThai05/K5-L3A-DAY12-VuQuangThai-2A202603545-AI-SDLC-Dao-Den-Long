@@ -12,7 +12,7 @@ test('web server serves the built game and local Three.js modules', { timeout: 1
     const [chunk] = await once(server.stdout, 'data');
     const port = chunk.toString().match(/localhost:(\d+)/)?.[1]; assert.ok(port);
     const root = `http://127.0.0.1:${port}`;
-    for (const path of ['/', '/style.css', '/src/main.js', '/src/game.js', '/src/config.js', '/vendor/three.module.js', '/vendor/three.core.js']) {
+    for (const path of ['/', '/style.css', '/src/main.js', '/src/scene.js', '/src/audio.js', '/src/game.js', '/src/levels.js', '/src/validation.js', '/src/config.js', '/vendor/three.module.js', '/vendor/three.core.js']) {
       const response = await fetch(root + path); assert.equal(response.status, 200, path);
       const text = await response.text(); assert.ok(text.length > 20, path);
       if (path.endsWith('.js')) assert.match(response.headers.get('content-type'), /javascript/);

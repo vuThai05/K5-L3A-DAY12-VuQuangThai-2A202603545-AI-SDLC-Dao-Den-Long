@@ -1,0 +1,117 @@
+{
+  "verified_at": "2026-11-20T08:59:21.501Z",
+  "contract_version": "1.1",
+  "node": "v22.18.0",
+  "platform": "win32",
+  "results": [
+    {
+      "command": "node --test",
+      "status": 0
+    },
+    {
+      "command": "node --check src/main.js",
+      "status": 0
+    },
+    {
+      "command": "node --check src/scene.js",
+      "status": 0
+    },
+    {
+      "command": "node --check src/audio.js",
+      "status": 0
+    },
+    {
+      "command": "node --check src/game.js",
+      "status": 0
+    },
+    {
+      "command": "node scripts/build.js",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 3000 --snapshot-every 60 --scenario docs/proof/phase-2/win-scenario.json --inputs docs/proof/phase-2/win-inputs.json --out docs/proof/phase-2/win.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 3000 --snapshot-every 60 --scenario docs/proof/phase-2/win-scenario.json --inputs docs/proof/phase-2/win-inputs.json --out docs/proof/phase-2/win.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 600 --scenario docs/proof/phase-2/loss-scenario.json --inputs docs/proof/phase-2/loss-inputs.json --out docs/proof/phase-2/loss.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-2/pulse-scenario.json --inputs docs/proof/phase-2/pulse-inputs.json --out docs/proof/phase-2/pulse.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-2/dawn-scenario.json --inputs docs/proof/phase-2/dawn-inputs.json --out docs/proof/phase-2/dawn.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 900 --snapshot-every 120 --out docs/proof/phase-2/seeded.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 900 --snapshot-every 120 --out docs/proof/phase-2/seeded.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 1 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-2/night-1.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 1 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-2/night-1.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 2 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-2/night-2.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 2 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-2/night-2.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 3 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-2/night-3.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 3 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-2/night-3.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 3 --ticks 21600 --snapshot-every 600 --scenario docs/proof/phase-2/benchmark-scenario.json --out docs/proof/phase-2/benchmark.jsonl",
+      "status": 0
+    }
+  ],
+  "deterministic_nights": [
+    {
+      "night": 1,
+      "sha256": "630f4dbb3590834e1f0e3a9f11d6f7fe73db021689c88b6711a476dbd7c36d39"
+    },
+    {
+      "night": 2,
+      "sha256": "28b7cef2a33c04cae4132a74563cb8adb239a968d7623983e9ea9fd224b516cb"
+    },
+    {
+      "night": 3,
+      "sha256": "de82d636689748cffe0a73e779c53e76bbfaa05b507f8ad7d49c4b3799d8727a"
+    }
+  ],
+  "benchmark": {
+    "ticks": 21600,
+    "elapsed_ms": 1056,
+    "budget_ms": 30000,
+    "wind_disabled": true,
+    "note": "Night 3, player in L1 safe area, other lamps unlit, standard random spawns enabled. Includes CLI and JSONL I/O."
+  },
+  "deterministic_win_sha256": "03aa999150a05a6543d964dd21d9cee17b95d7889aa6ba36cfccc7808a7ea152",
+  "win": {
+    "type": "end",
+    "ticks": 1432,
+    "state": "won",
+    "score": 1702
+  },
+  "visual_verification": "No WebGL/browser verification. HTTP/module checks and a DOM stub exercise flow handlers; they do not verify rendered graphics, audio quality, FPS or human playability."
+}

@@ -6,6 +6,22 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const cli = (...args) => spawnSync(process.execPath, ['src/headless.js', ...args], { encoding: 'utf8' });
 
+test('Contract 1.1 CLI accepts all nights and keeps executing input ticks during pause', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'lantern-v11-'));
+  try {
+    const scenario = join(dir, 'scenario.json'), inputs = join(dir, 'inputs.json'), out = join(dir, 'out.jsonl');
+    writeFileSync(scenario, JSON.stringify({ random_motes: false, random_shades: false, random_drifters: false, wind_enabled: false }));
+    writeFileSync(inputs, JSON.stringify({ frames: [{ tick: 0, move: [0, 1] }, { tick: 10, pause: true }, { tick: 11, pause: false }, { tick: 20, pause: true }, { tick: 21, pause: false }] }));
+    for (const night of [1, 2, 3]) {
+      const result = cli('--seed', '5', '--night', String(night), '--ticks', '30', '--snapshot-every', '1', '--scenario', scenario, '--inputs', inputs, '--out', out);
+      assert.equal(result.status, 0, result.stderr);
+      const lines = readFileSync(out, 'utf8').trim().split('\n').map(JSON.parse), snapshots = lines.filter(l => l.type === 'snapshot');
+      assert.equal(snapshots[11].state, 'paused'); assert.equal(snapshots[20].sim_tick, 10); assert.equal(snapshots[30].sim_tick, 20);
+      assert.equal(snapshots[30].night, night); assert.equal(lines.at(-1).ticks, 30); assert.ok(lines.some(e => e.name === 'resumed'));
+    }
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('CLI tick model, snapshot schedule, input retention and byte determinism', () => {
   const dir = mkdtempSync(join(tmpdir(), 'lantern-test-'));
   try {
@@ -17,9 +33,9 @@ test('CLI tick model, snapshot schedule, input retention and byte determinism', 
     const text = readFileSync(out, 'utf8'), lines = text.trim().split('\n').map(JSON.parse);
     const shots = lines.filter(l => l.type === 'snapshot');
     assert.deepEqual(shots.map(s => s.tick), [0, 10, 20, 30, 40, 50, 60]);
-    assert.equal(shots[0].player.carried, 0); assert.equal(lines[1].name, 'mote_picked'); assert.equal(lines[1].tick, 1);
+    assert.equal(shots[0].player.carried, 0); assert.equal(lines.find(l => l.name === 'mote_picked').tick, 1);
     assert.deepEqual(shots.at(-1).player.pos, [0, 0, 6]); assert.equal(shots.at(-1).time_left_s, 9);
-    assert.deepEqual(lines.at(-1), { type: 'end', ticks: 61, state: 'playing', score: 10 });
+    assert.deepEqual(lines.at(-1), { type: 'end', ticks: 61, state: 'playing', score: 0 });
     result = cli(...args); assert.equal(result.status, 0); assert.equal(readFileSync(out, 'utf8'), text);
     result = cli('--seed', '0', '--night', '1', '--ticks', '0', '--out', out); assert.equal(result.status, 0);
     assert.equal(readFileSync(out, 'utf8').trim().split('\n').length, 2);

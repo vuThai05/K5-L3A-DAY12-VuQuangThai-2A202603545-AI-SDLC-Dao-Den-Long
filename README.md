@@ -1,6 +1,7 @@
-# Đảo Đèn Lồng — bản chơi Phase 1
+# Đảo Đèn Lồng — bản chơi Phase 2
 
-Game 3D góc nhìn thứ ba: cùng Mây gom đom đóm, thắp 5 đèn và tránh Bóng Mực trên Đảo Bến.
+Game 3D góc nhìn thứ ba: cùng Mây đi qua **Đảo Bến → Đảo Cau → Đảo Chuông**, gom đom đóm,
+thắp đèn và tìm Bình Minh. Phase 2 thực hiện Ticket-02 / Test Contract **1.1**.
 Học viên: **Vũ Quang Thái · 2A202603545**. Video demo cuối bài sẽ bổ sung ở Phase 4.
 
 ## Cài và chơi (Windows, macOS, Linux)
@@ -22,41 +23,50 @@ bất kỳ static server nào. Tắt server bằng Ctrl+C.
 | WASD / ↑ ↓ | Di chuyển theo hướng camera |
 | ← → / giữ chuột và kéo | Xoay camera |
 | Space | Nhảy |
-| E | Nạp đom đóm cho đèn gần nhất (trong 3 m) |
-| Q | Tỏa sáng: tốn 3 đom đóm, choáng Bóng Mực trong 7 m |
-| Nút ? | Hướng dẫn, tạm dừng |
+| Shift | Lướt 14 m/s trong 0.2 s, hồi 1.5 s |
+| E | Nạp đom đóm cho đèn chưa sáng gần nhất (trong 2 m) |
+| Q | Tỏa sáng: tốn 3 đom đóm, bán kính 3D 5 m, hồi 3 s |
+| P / Esc | Tạm dừng: tiếp tục, chơi lại đêm, cài đặt, về menu |
+| Nút ? / ⚙ | Hướng dẫn / âm lượng và độ nhạy chuột (lưu trên trình duyệt) |
 
-Nhặt đom đóm tự động trong 1.5 m, túi tối đa 20. Mỗi đèn cần 10 con, có thể nạp từng phần.
-Đèn sáng tạo vùng trú an toàn 5 m. Thắp cả 5 đèn trong 300 giây thì thắng;
-hết 3 ngọn lửa hoặc hết giờ thì thua. Có nút chơi lại. Chuyển tab sẽ tạm dừng.
+Nhặt tự động trong 1 m và chênh cao ≤1.5 m, túi tối đa 10. Mỗi đèn cần 10 con, nạp từng phần được.
+Đèn sáng tạo vùng trú an toàn 6 m. Ba đêm có 5/6/7 đèn và 300/330/360 giây.
+Mỗi đêm bắt đầu với 3 Ngọn Lửa; hết lửa hoặc giờ thì thua, được chơi lại đúng đêm đó.
+Đảo Cau có cầu tre không lan can và bục phóng. Đảo Chuông có ba tầng, dốc, bục phóng và gió báo trước.
+Gió Lạc cướp đom đóm; pulse vào nó khi mang đồ để lấy lại. Bùa Gió cho chạy 7.2 m/s và lướt không hồi trong 10 s.
+Rơi xuống dưới Y=-10 mất một lửa và cả túi, hồi sinh sau 1 s. Chuyển tab sẽ tạm dừng.
 
-**Điểm:** mỗi lần nhặt +10, thắp đèn +100, mỗi Bóng Mực bị pulse làm choáng +20.
+**Điểm chuẩn:** mỗi đom đóm **nạp** +10, thắp đèn +100, mỗi Bóng Mực trúng pulse +5.
 Khi thắng cộng `floor(giây còn lại) × 2 + máu còn lại × 50`.
-Rơi đom đóm không trừ điểm; nhặt lại vẫn có điểm. Tất cả tuning thực tế ở [game.contract.json](game.contract.json).
+Nhặt không cộng điểm. Tổng game chỉ cộng các đêm đã thắng. Tuning ở [game.contract.json](game.contract.json).
 
 ## Kiểm chứng và headless
 
 ```sh
 npm run verify
 node src/headless.js --seed 12 --night 1 --ticks 900 --out run.jsonl --snapshot-every 60
-node src/headless.js --seed 12 --night 1 --scenario docs/proof/phase-1/win-scenario.json --inputs docs/proof/phase-1/win-inputs.json --ticks 3000 --out win.jsonl
+node src/headless.js --seed 12 --night 3 --ticks 21600 --scenario docs/proof/phase-2/benchmark-scenario.json --out night3.jsonl
 ```
 
 Headless không cần cài Three.js hay mở trình duyệt. Nhận đủ `--scenario`, `--inputs`,
-`--ticks`, `--snapshot-every`; chạy 60 Hz, xuất JSONL snapshot/event/end theo Contract 1.0.
-Đọc thêm [giả định, kế hoạch và tiêu chí nghiệm thu](docs/phase-1.md),
-[báo cáo chạy thật](docs/proof/phase-1/report.json), [test output](docs/proof/phase-1/tests.tap).
-`verify` chạy test, build, scenario thắng/thua/pulse/hết giờ và so output hai lần chạy;
+`--ticks`, `--snapshot-every`; `--night` nhận 1, 2 hoặc 3. Xuất JSONL snapshot/event/end theo Contract 1.1.
+Input gồm dash/pause ở cạnh nhấn; pause giữ nguyên sim_tick, đồng hồ và toàn bộ timer nhưng tick vẫn tăng.
+Đọc thêm [giả định và thay đổi so với Phase 1](docs/phase-2.md),
+[báo cáo chạy thật](docs/proof/phase-2/report.json), [test output](docs/proof/phase-2/tests.tap).
+`verify` chạy test, build, scenario thắng/thua/pulse/hết giờ, so output cả ba đêm từng byte và benchmark 21.600 tick;
 lỗi ở bất kỳ bước nào sẽ dừng với mã lỗi. GitHub Actions chạy lại trên Ubuntu khi push/PR.
+Giữ bằng chứng lịch sử [Phase 1](docs/proof/phase-1/report.json); các kỳ vọng bị thay bởi Ticket-02 được ghi trong tài liệu Phase 2.
 
-**Giới hạn kiểm chứng:** test tự động xác nhận logic/CLI và HTTP/module của bản build.
-Chưa kiểm chứng hình ảnh WebGL, thao tác chơi thật, âm thanh hoặc FPS vì kết nối browser
-trong phiên Codex không khả dụng. Chưa chạy CI Ubuntu từ phiên này; không khẳng định hidden tests đã đạt.
+**Giới hạn kiểm chứng:** test tự động xác nhận logic/CLI, HTTP/module và các handler UI với DOM giả lập.
+DOM giả lập không xác nhận hình ảnh, âm thanh hay cảm giác chơi. Theo yêu cầu, học viên tự test preview;
+Codex không tiếp tục preview. Benchmark ghi rõ cấu hình/tình huống trong report. Chưa có kết quả CI Ubuntu trong phiên này;
+không khẳng định hidden tests hoặc FPS đã đạt.
 
 ## Sáng tạo của tôi
 
-Đảo nổi giữa biển mây, lối đá nối năm đèn, nón lá có đèn nhỏ, hiệu ứng vòng sáng khi pulse,
-bản đồ nhỏ và âm thanh tổng hợp. Các phần trang trí chỉ ở renderer, không thêm thực thể gameplay
+Đảo nổi giữa biển mây, nón lá có đèn nhỏ, hiệu ứng vòng sáng khi pulse, lá bay trước gió,
+bản đồ nhỏ và nhạc/âm thanh tổng hợp. Bản đồ và bảng màu dùng đúng chuẩn Ticket-02.
+Các phần trang trí chỉ ở renderer, không thêm thực thể gameplay
 hay đổi output headless. Bằng chứng logic giữ nguyên: browser và CLI cùng import `src/game.js`;
 `verify` so output CLI từng byte. Phần hình ảnh cần chơi thử trực tiếp.
 

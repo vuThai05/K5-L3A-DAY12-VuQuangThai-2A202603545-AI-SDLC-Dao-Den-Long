@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { Game } from '../src/game.js';
 
-const dir = 'docs/proof/phase-1'; mkdirSync(dir, { recursive: true });
+const dir = 'docs/proof/phase-2'; mkdirSync(dir, { recursive: true });
 const results = [];
 function command(args) {
   const result = spawnSync(process.execPath, args, { encoding: 'utf8' });
@@ -14,7 +14,8 @@ function command(args) {
 }
 function json(name, data) { const path = `${dir}/${name}.json`; writeFileSync(path, JSON.stringify(data, null, 2) + '\n'); return path; }
 const tests = command(['--test']); writeFileSync(`${dir}/tests.tap`, tests.stdout);
-command(['--check', 'src/main.js']); command(['scripts/build.js']);
+for (const file of ['src/main.js', 'src/scene.js', 'src/audio.js', 'src/game.js']) command(['--check', file]);
+command(['scripts/build.js']);
 const base = new Game(12, { random_motes: false, random_shades: false });
 const scenario = { random_motes: false, random_shades: false, motes: base.lanterns.flatMap(l => Array.from({ length: 10 }, () => l.pos)) };
 const frames = [];
@@ -44,7 +45,22 @@ for (const [name, s, input, ticks] of [
 const seededArgs = ['src/headless.js', '--seed', '12', '--night', '1', '--ticks', '900', '--snapshot-every', '120', '--out', `${dir}/seeded.jsonl`];
 command(seededArgs); const seeded = readFileSync(`${dir}/seeded.jsonl`);
 command(seededArgs); assert.deepEqual(readFileSync(`${dir}/seeded.jsonl`), seeded);
+const nightHashes = [];
+for (const night of [1, 2, 3]) {
+  const args = ['src/headless.js', '--seed', '123', '--night', String(night), '--ticks', '1900', '--snapshot-every', '120', '--out', `${dir}/night-${night}.jsonl`];
+  command(args); const output = readFileSync(`${dir}/night-${night}.jsonl`); command(args); assert.deepEqual(readFileSync(`${dir}/night-${night}.jsonl`), output);
+  const rows = output.toString().trim().split('\n').map(JSON.parse); assert.equal(rows[0].night, night);
+  for (const s of rows.filter(r => r.type === 'snapshot')) for (const key of ['wind', 'motes', 'drifters', 'charms']) assert.ok(key in s);
+  nightHashes.push({ night, sha256: createHash('sha256').update(output).digest('hex') });
+}
+const benchmarkScenario = json('benchmark-scenario', { wind_enabled: false, player: { pos: [0, 6, 6] }, lanterns: [{ id: 'L1', lit: true }] });
+const started = performance.now();
+command(['src/headless.js', '--seed', '12', '--night', '3', '--ticks', '21600', '--snapshot-every', '600', '--scenario', benchmarkScenario, '--out', `${dir}/benchmark.jsonl`]);
+const elapsed = performance.now() - started, end = JSON.parse(readFileSync(`${dir}/benchmark.jsonl`, 'utf8').trim().split('\n').at(-1));
+assert.equal(end.ticks, 21600); assert.ok(elapsed <= 30000, `Headless exceeded 30s: ${elapsed}ms`);
 const sha = createHash('sha256').update(first).digest('hex');
-const report = { verified_at: new Date().toISOString(), node: process.version, platform: process.platform, results, deterministic_win_sha256: sha, win: JSON.parse(first.toString().trim().split('\n').at(-1)), visual_verification: 'Not yet performed. CLI tests do not verify WebGL or visual playability.' };
+const report = { verified_at: new Date().toISOString(), contract_version: '1.1', node: process.version, platform: process.platform, results, deterministic_nights: nightHashes,
+  benchmark: { ticks: end.ticks, elapsed_ms: Math.round(elapsed), budget_ms: 30000, wind_disabled: true, note: 'Night 3, player in L1 safe area, other lamps unlit, standard random spawns enabled. Includes CLI and JSONL I/O.' },
+  deterministic_win_sha256: sha, win: JSON.parse(first.toString().trim().split('\n').at(-1)), visual_verification: 'No WebGL/browser verification. HTTP/module checks and a DOM stub exercise flow handlers; they do not verify rendered graphics, audio quality, FPS or human playability.' };
 writeFileSync(`${dir}/report.json`, JSON.stringify(report, null, 2) + '\n');
 console.log(`Verification passed; evidence saved to ${dir}`);
