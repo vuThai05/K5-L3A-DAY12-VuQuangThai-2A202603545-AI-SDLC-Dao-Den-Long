@@ -50,13 +50,13 @@ test('pickup checks inclusive horizontal and height bounds, caps at 10, awards n
 });
 test('deposits select nearest unlit then lower id; partial progress scores per deposited mote', () => {
   const g = new Game(1, { ...empty, player: { carried: 5 }, lanterns: [{ id: 'L1', pos: [2, 0, 0] }, { id: 'L2', pos: [-2, 0, 0] }] });
-  g.step({ interact: true }); assert.equal(g.lanterns[0].deposited, 5); assert.equal(g.lanterns[1].deposited, 0); assert.equal(g.score, 50);
+  g.step({ interact: true }); assert.equal(g.lanterns[0].deposited, 5); assert.equal(g.lanterns[1].deposited, 0); assert.equal(g.score, 25);
   g.player.carried = 5; g.step({ interact: true }); assert.equal(g.lanterns[0].deposited, 5);
-  g.step({ interact: false }); g.step({ interact: true }); assert.equal(g.lanterns[0].lit, true); assert.equal(g.score, 200);
+  g.step({ interact: false }); g.step({ interact: true }); assert.equal(g.lanterns[0].lit, true); assert.equal(g.score, 150);
 });
-test('last lamp wins at exact deadline; no flames takes precedence over victory', () => {
+test('lighting on dawn tick counts towards threshold; no flames takes precedence', () => {
   const lanterns = Array.from({ length: 5 }, (_, i) => ({ id: `L${i + 1}`, lit: i > 0, pos: [0, 0, 0] }));
-  const g = new Game(1, { ...empty, time_left_s: 1 / 60, player: { carried: 10 }, lanterns }); g.step({ interact: true }); assert.equal(g.state, 'won'); assert.equal(g.score, 350);
+  const g = new Game(1, { ...empty, time_left_s: 1 / 60, player: { carried: 10 }, lanterns }); g.step({ interact: true }); assert.equal(g.state, 'won'); assert.equal(g.score, 1046); assert.equal(g.events.at(-1).data.reason, 'dawn_survived');
   const dead = new Game(1, { ...empty, player: { flames: 0 }, lanterns: lanterns.map(l => ({ ...l, lit: true })) }); dead.step(); assert.equal(dead.state, 'lost'); assert.equal(dead.events.at(-1).data.reason, 'no_flames');
 });
 test('pulse uses 3D target center, pushes 4 m over 15 ticks, stuns 120, cooldown 180', () => {

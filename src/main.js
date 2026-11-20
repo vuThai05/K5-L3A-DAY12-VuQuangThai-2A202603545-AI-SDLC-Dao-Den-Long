@@ -7,23 +7,27 @@ const $ = id => document.getElementById(id);
 try { boot(); } catch (error) { $('error').hidden = false; $('error').textContent = `Không thể mở game 3D. Hãy dùng trình duyệt hỗ trợ WebGL và bật tăng tốc phần cứng. ${error.message}`; }
 function boot() {
   const view = createScene($('world')), audio = createAudio(), keys = new Set();
-  let settings = { volume: .35, sensitivity: .3 };
-  try { const saved = JSON.parse(localStorage.getItem('lantern-settings') ?? '{}'); for (const key of ['volume', 'sensitivity']) if (typeof saved[key] === 'number' && Number.isFinite(saved[key])) settings[key] = Math.max(key === 'volume' ? 0 : .1, Math.min(1, saved[key])); } catch {}
+  let settings = { volume: .35, sensitivity: .3, colorblind: false };
+  try { const saved = JSON.parse(localStorage.getItem('lantern-settings') ?? '{}'); for (const key of ['volume', 'sensitivity']) if (typeof saved[key] === 'number' && Number.isFinite(saved[key])) settings[key] = Math.max(key === 'volume' ? 0 : .1, Math.min(1, saved[key])); if (typeof saved.colorblind === 'boolean') settings.colorblind = saved.colorblind; } catch {}
   audio.volume(settings.volume);
+  const saveSettings = () => { try { localStorage.setItem('lantern-settings', JSON.stringify(settings)); } catch {} };
+  const applyColorblind = () => { document.body.classList.toggle('colorblind', settings.colorblind); view.setColorblind(settings.colorblind); };
+  applyColorblind(); $('colorblind').checked = settings.colorblind;
+  $('colorblind').onchange = () => { settings.colorblind = $('colorblind').checked; applyColorblind(); saveSettings(); };
   let night = 1, wonScores = [], game, mode = 'menu', yaw = 0, last = performance.now(), time = 0, accumulator = 0;
   let dragging = false, mouseX = 0, pauseQueued = false, toastUntil = 0, lastSecond = 301, windWarning = false;
   const quotes = ['Một đốm sáng cũng đủ để con tìm thấy đường về. Hãy bắt đầu từ những chiếc đèn gần bến.', 'Cầu tre không có lan can. Hãy để những bục vàng đưa con vượt biển mây, và giữ túi đom đóm khỏi Gió Lạc.', 'Đường lên cao bắt đầu từ hai con dốc. Nghe tiếng lá trước cơn gió, rồi mang ánh sáng tới tháp chuông.'];
-  function notify(text) { $('toast').textContent = text; $('toast').classList.add('show'); toastUntil = performance.now() + 2400; }
+  function notify(text, warning = false) { $('toast').textContent = `${settings.colorblind && warning ? '⚠ ' : ''}${text}`; $('toast').classList.toggle('warning', warning); $('toast').classList.add('show'); toastUntil = performance.now() + 2400; }
   function closeDialogs() { for (const el of document.querySelectorAll('dialog[open]')) el.close(); }
   function load(n) {
     night = n; game = new Game(12, {}, n); yaw = 0; accumulator = 0; keys.clear(); pauseQueued = false; lastSecond = game.time_left_s + 1; windWarning = false;
     view.load(game); $('lamps').innerHTML = '<i></i>'.repeat(game.lanterns.length); $('mote-slots').innerHTML = '<i></i>'.repeat(10);
-    $('chapter').innerHTML = `<span>ĐÊM ${n}</span> ${game.level.name}`; $('objective-title').textContent = `THẮP SÁNG ${game.level.name.toLocaleUpperCase('vi')}`;
+    $('chapter').innerHTML = `<span>ĐÊM ${n}</span> ${game.level.name}`; $('objective-title').textContent = 'GIỮ ĐÈN TỚI BÌNH MINH';
   }
   function briefing(n) {
     closeDialogs(); load(n); mode = 'briefing'; $('intro').hidden = true; $('ending').hidden = true; $('hud').hidden = true; document.body.classList.add('playing');
     $('night-label').textContent = `ĐÊM ${n} · LỜI ÔNG ĐĂNG`; $('night-name').textContent = game.level.name; $('night-quote').textContent = `“${quotes[n - 1]}”`;
-    $('night-task').textContent = `${game.lanterns.length} chiếc đèn · ${game.level.duration} giây · 3 Ngọn Lửa`; $('briefing').showModal(); audio.activate();
+    $('night-task').textContent = `Giữ ít nhất ${Math.ceil(.6 * game.lanterns.length)}/${game.lanterns.length} đèn sáng khi hết ${game.level.duration} giây. Nhớ châm dầu và xua Bóng Mực hút dầu.`; $('briefing').showModal(); audio.activate();
   }
   function begin() { closeDialogs(); document.activeElement?.blur(); mode = 'play'; $('hud').hidden = false; audio.activate(); notify('Đi theo những đốm vàng. Đừng để lửa tắt.'); }
   function menu() { closeDialogs(); mode = 'menu'; wonScores = []; load(1); $('intro').hidden = false; $('ending').hidden = true; $('hud').hidden = true; document.body.classList.remove('playing'); $('chapter').innerHTML = '<span>BA ĐÊM</span> Một bình minh'; }
@@ -45,7 +49,7 @@ function boot() {
   for (const key of ['volume', 'sensitivity']) {
     $(key).value = settings[key];
     const label = () => $(`${key}-value`).textContent = key === 'volume' ? `${Math.round(settings[key] * 100)}%` : settings[key].toFixed(2);
-    label(); $(key).oninput = () => { settings[key] = Number($(key).value); label(); audio.volume(settings.volume); try { localStorage.setItem('lantern-settings', JSON.stringify(settings)); } catch {} };
+    label(); $(key).oninput = () => { settings[key] = Number($(key).value); label(); audio.volume(settings.volume); saveSettings(); };
   }
   const used = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyE', 'KeyQ', 'Space', 'ShiftLeft', 'ShiftRight', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   addEventListener('keydown', e => {
@@ -68,7 +72,7 @@ function boot() {
     const dot = (pos, color, size) => { map.fillStyle = color; map.beginPath(); map.arc(pos[0], pos[2], size / scale, 0, Math.PI * 2); map.fill(); };
     for (const m of game.motes) dot(m.pos, C.halo, 1.4);
     for (const l of game.lanterns) dot(l.pos, l.lit ? C.lamp : C.unlit, 3.4);
-    for (const s of game.shades) dot(s.pos, C.edge, 2.3);
+    for (const s of game.shades) dot(s.pos, settings.colorblind ? '#00B3FF' : C.edge, 2.3);
     for (const d of game.drifters) if (d.state !== 'removed') dot(d.pos, C.drifter, 2.6);
     for (const c of game.charms) if (c.available) dot(c.pos, C.red, 2.5);
     dot(game.player.pos, C.text, 3); map.restore();
@@ -76,16 +80,21 @@ function boot() {
   function hud() {
     const lit = game.lanterns.filter(l => l.lit).length, p = game.player, seconds = Math.ceil(game.time_left_s);
     $('health').textContent = Array.from({ length: 3 }, (_, i) => i < p.flames ? '◆' : '◇').join(' ');
-    $('carried').textContent = p.carried; [...$('mote-slots').children].forEach((el, i) => el.classList.toggle('filled', i < p.carried));
+    $('carried').textContent = p.carried; $('capacity').textContent = p.capacity;
+    if ($('mote-slots').children.length !== p.capacity) $('mote-slots').innerHTML = '<i></i>'.repeat(p.capacity);
+    [...$('mote-slots').children].forEach((el, i) => el.classList.toggle('filled', i < p.carried));
     [...$('lamps').children].forEach((el, i) => el.classList.toggle('lit', game.lanterns[i].lit));
-    $('lamp-count').textContent = `${lit} / ${game.lanterns.length} đèn đã sáng`; $('score').textContent = `${game.score} điểm · Đã giữ ${wonScores.reduce((a, b) => a + b, 0)}`;
+    $('lamp-count').textContent = `${lit}/${game.lanterns.length} sáng · Cần ${Math.ceil(.6 * game.lanterns.length)} ở bình minh`; $('score').textContent = `${game.score} điểm · Đã giữ ${wonScores.reduce((a, b) => a + b, 0)}`;
     $('timer').textContent = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; $('timer').classList.toggle('urgent', seconds <= 30);
+    $('warning-symbol').hidden = !settings.colorblind || seconds > 30;
     $('dash-status').textContent = `Shift · Lướt ${game.charmTicks ? '∞' : game.dashCd ? (game.dashCd / 60).toFixed(1) + 's' : 'sẵn sàng'}`;
     $('pulse-status').textContent = `Q · Tỏa sáng ${game.pulseCd ? (game.pulseCd / 60).toFixed(1) + 's' : '3 đom đóm'}`;
     $('charm-status').textContent = game.charmTicks ? `Bùa Gió: ${(game.charmTicks / 60).toFixed(1)}s` : 'Giữ lửa, thắp bình minh.';
-    $('wind-status').textContent = game.wind.active ? 'GIÓ MẠNH · CẨN THẬN MÉP ĐẢO' : game.wind.warning ? 'LÁ ĐANG BAY · GIÓ SẮP ĐẾN' : '';
-    const nearest = game.lanterns.filter(l => !l.lit).sort((a, b) => distance(p.pos, a.pos) - distance(p.pos, b.pos))[0];
-    $('hint').textContent = game.respawnTicks ? 'Mây đang tìm đường trở lại…' : nearest && distance(p.pos, nearest.pos) <= 2 ? `E — Nạp ánh sáng (${nearest.deposited}/10)` : game.safe(p.pos) ? 'Ánh đèn bảo vệ bạn khỏi Bóng Mực.' : p.carried === 10 ? 'Túi đã đầy. Mang ánh sáng về đèn.' : 'Gom những đốm vàng. Cẩn thận Gió Lạc và mép đảo.';
+    $('wind-status').textContent = `${settings.colorblind && (game.wind.active || game.wind.warning) ? '⚠ ' : ''}${game.wind.active ? 'GIÓ MẠNH · CẨN THẬN MÉP ĐẢO' : game.wind.warning ? 'LÁ ĐANG BAY · GIÓ SẮP ĐẾN' : ''}`;
+    const byDistance = (a, b) => distance(p.pos, a.pos) - distance(p.pos, b.pos);
+    const receiver = game.lanterns.filter(l => game.canReceive(l) && distance(p.pos, l.pos) <= 2).sort(byDistance)[0];
+    const needy = game.lanterns.filter(l => l.lit && l.fuel < 30), nearest = (needy.length ? needy : game.lanterns.filter(l => !l.lit)).sort(byDistance)[0];
+    $('hint').textContent = game.respawnTicks ? 'Mây đang tìm đường trở lại…' : receiver ? receiver.lit ? `E — Châm dầu (${receiver.fuel.toFixed(1)}/100)` : `E — ${receiver.ever_lit ? 'Thắp lại' : 'Nạp ánh sáng'} (${receiver.deposited}/${game.lanternCost(receiver)})` : game.safe(p.pos) ? 'Đèn còn đủ dầu đang bảo vệ bạn.' : p.carried === p.capacity ? 'Túi đã đầy. Mang ánh sáng về đèn.' : 'Giữ đủ đèn sáng tới bình minh. Đèn yếu cần châm dầu.';
     $('direction').hidden = true;
     if (nearest && mode === 'play') {
       const v = view.project([nearest.pos[0], nearest.pos[1] + 3, nearest.pos[2]]);
@@ -101,16 +110,18 @@ function boot() {
     for (const e of list) {
       audio.effect(e.name);
       if (e.name === 'pulse') view.pulse(game.player.pos);
-      if (e.name === 'lantern_lit') notify('Một chiếc đèn đã thức giấc.');
-      if (e.name === 'player_hit') notify(e.data.by === 'fall' ? 'Mây rơi khỏi đảo. Túi ánh sáng đã mất.' : 'Mất một ngọn lửa! Hãy tìm vùng sáng.');
-      if (e.name === 'drifter_steal') notify('Gió Lạc đã cướp đom đóm! Tỏa sáng để lấy lại.');
+      if (e.name === 'lantern_lit') notify(e.data.relight ? 'Đèn đã sáng lại. Túi ánh sáng lớn thêm!' : 'Một chiếc đèn đã thức giấc. Túi ánh sáng lớn thêm!');
+      if (e.name === 'lantern_out') notify(`${e.data.lantern_id} đã cạn dầu. Mang 5 đom đóm để thắp lại.`, true);
+      if (e.name === 'refuel') notify(`${e.data.lantern_id} đã được châm dầu.`);
+      if (e.name === 'player_hit') notify(e.data.by === 'fall' ? 'Mây rơi khỏi đảo. Túi ánh sáng đã mất.' : 'Mất một ngọn lửa! Hãy tìm vùng sáng.', true);
+      if (e.name === 'drifter_steal') notify('Gió Lạc đã cướp đom đóm! Tỏa sáng để lấy lại.', true);
       if (e.name === 'charm_picked') notify('Bùa Gió: chạy nhanh, lướt không hồi trong 10 giây.');
       if (e.name === 'game_over') {
         mode = 'result'; closeDialogs(); keys.clear(); $('hud').hidden = true; $('ending').hidden = false;
         const won = game.state === 'won'; if (won) wonScores[night - 1] = game.score;
         audio.effect(won ? 'won' : 'lost');
         $('end-title').textContent = won ? night === 3 ? 'Bình Minh.' : `${game.level.name} đã sáng.` : 'Giữ lại một hy vọng.';
-        $('end-copy').textContent = won ? night === 3 ? 'Ba hòn đảo đã tìm lại ánh sáng. Cảm ơn Mây, người giữ đèn nhỏ tuổi.' : 'Ông Đăng đang đợi bạn ở hòn đảo kế tiếp.' : e.data.reason === 'dawn' ? 'Đêm đã hết. Thử lại đêm này, những đêm đã thắng vẫn được giữ.' : 'Ngọn lửa cuối đã tắt. Mình thử lại nhé?';
+        $('end-copy').textContent = won ? night === 3 ? 'Mây đã giữ đảo sáng tới bình minh. Cảm ơn người giữ đèn nhỏ tuổi.' : 'Bạn đã giữ đủ đèn tới bình minh. Ông Đăng đang đợi ở đảo kế tiếp.' : e.data.reason === 'dawn' ? 'Bình minh đến nhưng chưa đủ đèn sáng. Thử lại đêm này, những đêm đã thắng vẫn được giữ.' : 'Ngọn lửa cuối đã tắt. Mình thử lại nhé?';
         $('end-score').textContent = won && night === 3 ? `Tổng ${wonScores.reduce((a, b) => a + b, 0)} điểm` : `${game.score} điểm đêm này`;
         $('restart').textContent = won ? night === 3 ? 'Về menu' : 'Đến hòn đảo tiếp theo' : 'Chơi lại Đêm';
       }

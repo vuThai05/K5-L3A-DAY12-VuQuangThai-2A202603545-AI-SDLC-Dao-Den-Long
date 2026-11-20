@@ -5,3 +5,4 @@
 - Mô hình Mây (nón lá và đèn nhỏ), ba đảo, cầu, dốc, tháp, cây, đèn, Bóng Mực, Gió Lạc, bùa, mây, hạt sáng: hình học bằng mã trong `src/scene.js`; dữ liệu chuẩn và bảng màu từ Ticket-02 ở `src/levels.js`. Codex hỗ trợ triển khai. Không tải model, texture hoặc font bên ngoài.
 - Nhạc nền đêm và hiệu ứng: sóng sine tổng hợp bằng Web Audio trong `src/audio.js`, không dùng bản ghi bên ngoài.
 - Công cụ AI: OpenAI Codex, kỹ năng Ponytail; hướng dẫn Sites cho preview cục bộ. Không cần API key để chơi hoặc chạy headless.
+- Phase 3: trạng thái dầu, luật bình minh, công thức điểm và bảng màu mù màu theo Ticket-03 của lab. Thanh dầu, vết rách giấy và mắt Bóng Mực được tạo bằng hình học/mã; không dùng asset ngoài.

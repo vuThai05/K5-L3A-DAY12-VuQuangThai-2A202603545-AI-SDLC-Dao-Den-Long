@@ -13,7 +13,7 @@ export function createScene(canvas) {
   moon.shadow.mapSize.set(2048, 2048); Object.assign(moon.shadow.camera, { left: -65, right: 120, top: 65, bottom: -65, far: 180 }); moon.shadow.bias = -.0005; scene.add(moon);
   const mat = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: .8, ...extra });
   const materials = { grass: mat(C.grass), sand: mat(C.sand), wood: mat(C.wood), gold: mat(C.gold), clouds: mat(C.clouds, { transparent: true, opacity: .45 }),
-    coat: mat(C.coat), red: mat(C.red), shade: mat(C.shade), stunned: mat(C.stunned), rim: new THREE.MeshBasicMaterial({ color: C.edge, wireframe: true, transparent: true, opacity: .3 }), drifter: mat(C.drifter),
+    coat: mat(C.coat), red: mat(C.red), shade: mat(C.shade), stunned: mat(C.stunned), rim: new THREE.MeshBasicMaterial({ color: C.edge, wireframe: true, transparent: true, opacity: .3 }), eyes: new THREE.MeshBasicMaterial({ color: C.edge }), drifter: mat(C.drifter),
     mote: new THREE.MeshBasicMaterial({ color: C.mote }), halo: new THREE.MeshBasicMaterial({ color: C.halo, transparent: true, opacity: .15, depthWrite: false }) };
   let staticGroup, entityGroup, level, player, pulseRing, leaves, flash = 10;
   const lamps = new Map(), motes = new Map(), shades = new Map(), drifters = new Map(), charms = new Map(), legs = [];
@@ -22,7 +22,7 @@ export function createScene(canvas) {
   const uniqueGeometries = new Set(), uniqueMaterials = new Set();
   function clear() {
     if (staticGroup) {
-      for (const group of [staticGroup, entityGroup]) group.traverse(o => { if (o.isMesh) { uniqueGeometries.add(o.geometry); if (!Object.values(materials).includes(o.material)) uniqueMaterials.add(o.material); } });
+      for (const group of [staticGroup, entityGroup]) group.traverse(o => { if (o.isMesh || o.isLine) { uniqueGeometries.add(o.geometry); if (!Object.values(materials).includes(o.material)) uniqueMaterials.add(o.material); } });
       for (const g of uniqueGeometries) if (![sphere, shadeGeo].includes(g)) g.dispose();
       for (const m of uniqueMaterials) m.dispose(); uniqueGeometries.clear(); uniqueMaterials.clear();
       scene.remove(staticGroup, entityGroup);
@@ -75,7 +75,15 @@ export function createScene(canvas) {
       mesh(new THREE.ConeGeometry(.95, .5, 8), materials.wood, g, 0, 4.1);
       const light = new THREE.PointLight(C.lamp, 0, 17, 2); light.position.y = 3; g.add(light);
       const safe = mesh(new THREE.RingGeometry(5.93, 6, 64), new THREE.MeshBasicMaterial({ color: C.gold, transparent: true, opacity: 0, side: THREE.DoubleSide }), g, 0, .03); safe.rotation.x = -Math.PI / 2;
-      lamps.set(l.id, { paper, light, safe });
+      const tears = new THREE.Group(); tears.position.y = 3; g.add(tears);
+      for (let i = 0; i < 4; i++) {
+        const tear = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-.18, .15, .6), new THREE.Vector3(-.05, -.02, .65), new THREE.Vector3(.06, .03, .65), new THREE.Vector3(.17, -.18, .6)]), new THREE.LineBasicMaterial({ color: C.shade }));
+        tear.rotation.y = i * Math.PI / 2; tears.add(tear);
+      }
+      const fuelBar = new THREE.Group(); fuelBar.position.set(0, 4.8, 0); g.add(fuelBar);
+      mesh(new THREE.PlaneGeometry(1.5, .15), new THREE.MeshBasicMaterial({ color: C.sky, side: THREE.DoubleSide }), fuelBar);
+      const fuelFill = mesh(new THREE.PlaneGeometry(1.4, .09), new THREE.MeshBasicMaterial({ color: C.gold, side: THREE.DoubleSide, transparent: true }), fuelBar, 0, 0, .01);
+      lamps.set(l.id, { paper, light, safe, tears, fuelBar, fuelFill });
     }
     player = new THREE.Group(); entityGroup.add(player);
     mesh(new THREE.ConeGeometry(.38, .95, 8), materials.coat, player, 0, .85);
@@ -99,12 +107,19 @@ export function createScene(canvas) {
   function update(game, dt, time, yaw, overview) {
     flash += dt;
     ambient.intensity = .15 + .55 * game.lanterns.filter(l => l.lit).length / game.lanterns.length;
-    for (const l of game.lanterns) { const v = lamps.get(l.id); v.paper.material.color.set(l.lit ? C.lamp : C.unlit); v.paper.material.emissiveIntensity = l.lit ? 1.7 : 0; v.light.intensity = l.lit ? 90 : 0; v.safe.material.opacity = l.lit ? .35 : 0; }
+    for (const l of game.lanterns) {
+      const v = lamps.get(l.id), blink = l.lit && l.fuel < 30 && Math.floor(game.sim_tick / 30) % 2 ? .25 : 1, fraction = l.fuel / 100;
+      v.paper.material.color.set(l.lit ? C.lamp : C.unlit); v.paper.material.emissiveIntensity = l.lit ? 1.7 * blink : 0;
+      v.paper.scale.y = 1.3 * (l.lit ? 1 : .8); v.tears.visible = !l.lit;
+      v.light.intensity = l.lit ? 90 * blink : 0; v.safe.material.opacity = game.protects(l) ? .35 : 0;
+      v.fuelBar.visible = l.lit; v.fuelBar.quaternion.copy(camera.quaternion);
+      v.fuelFill.scale.x = fraction; v.fuelFill.position.x = -.7 + fraction * .7; v.fuelFill.material.opacity = blink;
+    }
     player.position.fromArray(game.player.pos); player.rotation.y = Math.atan2(game.facing[0], game.facing[1]); player.visible = !game.respawnTicks && (!game.invuln || Math.floor(time * 12) % 2 === 0);
     const moving = game.state === 'playing' && Math.hypot(game.player.vel[0], game.player.vel[2]) > .01;
     legs.forEach((l, i) => l.rotation.x = moving ? Math.sin(time * 13 + i * Math.PI) * .7 : 0);
     syncList(game.motes, motes, () => { const g = new THREE.Group(); mesh(sphere, materials.mote, g); mesh(new THREE.SphereGeometry(.29, 8, 6), materials.halo, g); entityGroup.add(g); return g; }, (v, m) => { v.position.set(m.pos[0], m.pos[1] + .55 + Math.sin(time * 3 + m.pos[0]) * .15, m.pos[2]); });
-    syncList(game.shades, shades, () => { const g = new THREE.Group(); mesh(shadeGeo, materials.shade, g).scale.y = 1.2; mesh(shadeGeo, materials.rim, g).scale.set(1.05, 1.25, 1.05); entityGroup.add(g); return g; }, (v, s) => { v.position.fromArray(s.pos); v.children[0].material = s.state === 'stunned' ? materials.stunned : materials.shade; v.scale.setScalar(s.state === 'spawning' ? .6 : 1); });
+    syncList(game.shades, shades, () => { const g = new THREE.Group(); mesh(shadeGeo, materials.shade, g).scale.y = 1.2; mesh(shadeGeo, materials.rim, g).scale.set(1.05, 1.25, 1.05); for (const side of [-1, 1]) mesh(new THREE.SphereGeometry(.07, 8, 6), materials.eyes, g, side * .2, .15, .56); entityGroup.add(g); return g; }, (v, s) => { v.position.fromArray(s.pos); v.rotation.y = Math.atan2(game.player.pos[0] - s.pos[0], game.player.pos[2] - s.pos[2]); v.children[0].material = s.state === 'stunned' ? materials.stunned : materials.shade; v.scale.setScalar(s.state === 'spawning' ? .6 : 1); });
     syncList(game.drifters.filter(d => d.state !== 'removed'), drifters, () => { const g = new THREE.Group(); for (let i = 0; i < 6; i++) mesh(new THREE.SphereGeometry(.25, 6, 4), materials.drifter, g, 0, 0, -i * .3).scale.set(1, .25, 1); entityGroup.add(g); return g; }, (v, d) => { v.position.fromArray(d.pos); v.rotation.y = Math.atan2(d.dir[0], d.dir[1]); v.children.forEach((p, i) => p.position.y = Math.sin(time * 5 + i) * .2); });
     syncList(game.charms, charms, () => { const g = new THREE.Group(); mesh(new THREE.BoxGeometry(.5, .8, .05), materials.gold, g); mesh(new THREE.BoxGeometry(.42, .7, .06), materials.red, g, 0, 0, .02); entityGroup.add(g); return g; }, (v, c) => { v.position.set(c.pos[0], c.pos[1] + .8 + Math.sin(time * 2) * .1, c.pos[2]); v.visible = c.available; v.rotation.y = time * .5; });
     pulseRing.material.opacity = Math.max(0, .7 * (1 - flash / .6)); pulseRing.scale.setScalar(.1 + Math.min(1, flash / .6) * 5);
@@ -117,5 +132,5 @@ export function createScene(canvas) {
   }
   function resize() { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); }
   resize(); addEventListener('resize', resize);
-  return { load, update, pulse(pos) { flash = 0; pulseRing.position.set(pos[0], pos[1] + .12, pos[2]); }, project(pos) { return new THREE.Vector3(...pos).project(camera); } };
+  return { load, update, setColorblind(enabled) { const color = enabled ? '#00B3FF' : C.edge; materials.rim.color.set(color); materials.eyes.color.set(color); }, pulse(pos) { flash = 0; pulseRing.position.set(pos[0], pos[1] + .12, pos[2]); }, project(pos) { return new THREE.Vector3(...pos).project(camera); } };
 }

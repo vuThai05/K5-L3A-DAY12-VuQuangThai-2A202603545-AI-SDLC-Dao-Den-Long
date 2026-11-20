@@ -1,0 +1,322 @@
+TAP version 13
+# Subtest: Contract 1.1 CLI accepts all nights and keeps executing input ticks during pause
+ok 1 - Contract 1.1 CLI accepts all nights and keeps executing input ticks during pause
+  ---
+  duration_ms: 614.4325
+  type: 'test'
+  ...
+# Subtest: CLI tick model, snapshot schedule, input retention and byte determinism
+ok 2 - CLI tick model, snapshot schedule, input retention and byte determinism
+  ---
+  duration_ms: 309.5364
+  type: 'test'
+  ...
+# Subtest: CLI reports document errors on stderr and exits 2, output failure exits 1
+ok 3 - CLI reports document errors on stderr and exits 2, output failure exits 1
+  ---
+  duration_ms: 311.1207
+  type: 'test'
+  ...
+# Subtest: fuel expires at exactly 6000 simulation ticks, resets progress, emits out once and remembers history
+ok 4 - fuel expires at exactly 6000 simulation ticks, resets progress, emits out once and remembers history
+  ---
+  duration_ms: 56.193
+  type: 'test'
+  ...
+# Subtest: lit lamps do not win early; durations are 240/270/300
+ok 5 - lit lamps do not win early; durations are 240/270/300
+  ---
+  duration_ms: 5.4865
+  type: 'test'
+  ...
+# Subtest: fuel rounds only in output: displayed 30.0 can already have lost its safe zone
+ok 6 - fuel rounds only in output: displayed 30.0 can already have lost its safe zone
+  ---
+  duration_ms: 2.8023
+  type: 'test'
+  ...
+# Subtest: refuel uses integer ceil/cap, scores 5 per used mote, and does not grow capacity
+ok 7 - refuel uses integer ceil/cap, scores 5 per used mote, and does not grow capacity
+  ---
+  duration_ms: 2.5767
+  type: 'test'
+  ...
+# Subtest: full lamp is excluded; equal-distance receivers select lower id including refuel
+ok 8 - full lamp is excluded; equal-distance receivers select lower id including refuel
+  ---
+  duration_ms: 0.8343
+  type: 'test'
+  ...
+# Subtest: extinction occurs before same-tick interaction, allowing a five-mote relight at dawn
+ok 9 - extinction occurs before same-tick interaction, allowing a five-mote relight at dawn
+  ---
+  duration_ms: 0.458
+  type: 'test'
+  ...
+# Subtest: first light and repeated relights grow capacity by two, cap at 20 and award distinct scores
+ok 10 - first light and repeated relights grow capacity by two, cap at 20 and award distinct scores
+  ---
+  duration_ms: 1.2697
+  type: 'test'
+  ...
+# Subtest: pickup respects increased capacity without exceeding the cap
+ok 11 - pickup respects increased capacity without exceeding the cap
+  ---
+  duration_ms: 0.635
+  type: 'test'
+  ...
+# Subtest: two draining shades stack with decay and emit one event each per 60 actual drain ticks
+ok 12 - two draining shades stack with decay and emit one event each per 60 actual drain ticks
+  ---
+  duration_ms: 1.9015
+  type: 'test'
+  ...
+# Subtest: wander chooses weak lamp by nearest then id; entering drain begins fuel removal next tick
+ok 13 - wander chooses weak lamp by nearest then id; entering drain begins fuel removal next tick
+  ---
+  duration_ms: 1.2172
+  type: 'test'
+  ...
+# Subtest: chasing shade keeps player target instead of diverting to weak lamp
+ok 14 - chasing shade keeps player target instead of diverting to weak lamp
+  ---
+  duration_ms: 0.4201
+  type: 'test'
+  ...
+# Subtest: drain exits to chase at 6m, wander on extinction, invalid target distance or replenished safety
+ok 15 - drain exits to chase at 6m, wander on extinction, invalid target distance or replenished safety
+  ---
+  duration_ms: 0.6753
+  type: 'test'
+  ...
+# Subtest: pulse awards total 15 for drain and 5 otherwise, stops draining next tick, ends stun in wander
+ok 16 - pulse awards total 15 for drain and 5 otherwise, stops draining next tick, ends stun in wander
+  ---
+  duration_ms: 5.9463
+  type: 'test'
+  ...
+# Subtest: a shade being expelled cannot damage a player just outside the safe edge in that tick
+ok 17 - a shade being expelled cannot damage a player just outside the safe edge in that tick
+  ---
+  duration_ms: 2.2335
+  type: 'test'
+  ...
+# Subtest: pause freezes fuel and per-shade drain event counters
+ok 18 - pause freezes fuel and per-shade drain event counters
+  ---
+  duration_ms: 1.2659
+  type: 'test'
+  ...
+# Subtest: dawn requires 3/5, 4/6 or 5/7 lights and scores only lit fuel floor plus flames
+ok 19 - dawn requires 3/5, 4/6 or 5/7 lights and scores only lit fuel floor plus flames
+  ---
+  duration_ms: 0.9472
+  type: 'test'
+  ...
+# Subtest: final-tick extinction can lose dawn, final-tick death always wins precedence
+ok 20 - final-tick extinction can lose dawn, final-tick death always wins precedence
+  ---
+  duration_ms: 0.8755
+  type: 'test'
+  ...
+# Subtest: new scenario fields are validated without awarding scenario points or relights
+ok 21 - new scenario fields are validated without awarding scenario points or relights
+  ---
+  duration_ms: 0.9014
+  type: 'test'
+  ...
+# Subtest: three maps have exact standard lamps, spawn slots, terrain and charm/pad locations
+ok 22 - three maps have exact standard lamps, spawn slots, terrain and charm/pad locations
+  ---
+  duration_ms: 2.9235
+  type: 'test'
+  ...
+# Subtest: tick zero has no gameplay events or points; snapshot includes 1.1 fields
+ok 23 - tick zero has no gameplay events or points; snapshot includes 1.1 fields
+  ---
+  duration_ms: 3.4128
+  type: 'test'
+  ...
+# Subtest: movement uses camera rotation, input retention and diagonal normalization
+ok 24 - movement uses camera rotation, input retention and diagonal normalization
+  ---
+  duration_ms: 1.7406
+  type: 'test'
+  ...
+# Subtest: jump follows gravity -20, air control is full, holding jump never repeats
+ok 25 - jump follows gravity -20, air control is full, holding jump never repeats
+  ---
+  duration_ms: 1.797
+  type: 'test'
+  ...
+# Subtest: dash covers 2.8 m in 12 ticks, locks direction, and cooldown starts at activation
+ok 26 - dash covers 2.8 m in 12 ticks, locks direction, and cooldown starts at activation
+  ---
+  duration_ms: 1.1028
+  type: 'test'
+  ...
+# Subtest: air dash holds Y for all 12 ticks and does not grant damage immunity
+ok 27 - air dash holds Y for all 12 ticks and does not grant damage immunity
+  ---
+  duration_ms: 1.5232
+  type: 'test'
+  ...
+# Subtest: pickup checks inclusive horizontal and height bounds, caps at 10, awards no points
+ok 28 - pickup checks inclusive horizontal and height bounds, caps at 10, awards no points
+  ---
+  duration_ms: 1.0785
+  type: 'test'
+  ...
+# Subtest: deposits select nearest unlit then lower id; partial progress scores per deposited mote
+ok 29 - deposits select nearest unlit then lower id; partial progress scores per deposited mote
+  ---
+  duration_ms: 1.0253
+  type: 'test'
+  ...
+# Subtest: lighting on dawn tick counts towards threshold; no flames takes precedence
+ok 30 - lighting on dawn tick counts towards threshold; no flames takes precedence
+  ---
+  duration_ms: 1.4529
+  type: 'test'
+  ...
+# Subtest: pulse uses 3D target center, pushes 4 m over 15 ticks, stuns 120, cooldown 180
+ok 31 - pulse uses 3D target center, pushes 4 m over 15 ticks, stuns 120, cooldown 180
+  ---
+  duration_ms: 26.9712
+  type: 'test'
+  ...
+# Subtest: pulse with insufficient motes or cooldown produces no pulse event
+ok 32 - pulse with insufficient motes or cooldown produces no pulse event
+  ---
+  duration_ms: 1.2997
+  type: 'test'
+  ...
+# Subtest: pulse push stops at the bell tower obstacle without sliding through it
+ok 33 - pulse push stops at the bell tower obstacle without sliding through it
+  ---
+  duration_ms: 0.8366
+  type: 'test'
+  ...
+# Subtest: safe lights repel within 30 ticks and prevent hits immediately
+ok 34 - safe lights repel within 30 ticks and prevent hits immediately
+  ---
+  duration_ms: 1.6463
+  type: 'test'
+  ...
+# Subtest: shade detection at 12, release over 18, exactly one hit per tick ordered by id
+ok 35 - shade detection at 12, release over 18, exactly one hit per tick ordered by id
+  ---
+  duration_ms: 2.788
+  type: 'test'
+  ...
+# Subtest: height prevents shade contact, while dash does not
+ok 36 - height prevents shade contact, while dash does not
+  ---
+  duration_ms: 0.9133
+  type: 'test'
+  ...
+# Subtest: fall ignores invulnerability, loses entire bag once, respawns after 60 ticks
+ok 37 - fall ignores invulnerability, loses entire bag once, respawns after 60 ticks
+  ---
+  duration_ms: 1.2971
+  type: 'test'
+  ...
+# Subtest: standard initial motes occupy 20 distinct points; fixed spawn schedules respect flags
+ok 38 - standard initial motes occupy 20 distinct points; fixed spawn schedules respect flags
+  ---
+  duration_ms: 35.7332
+  type: 'test'
+  ...
+# Subtest: pause advances tick while freezing simulation, cooldowns, TTL, spawning and charm timers
+ok 39 - pause advances tick while freezing simulation, cooldowns, TTL, spawning and charm timers
+  ---
+  duration_ms: 0.9118
+  type: 'test'
+  ...
+# Subtest: dropped mote TTL expires at 480 ticks and new drops cannot be picked in same tick
+ok 40 - dropped mote TTL expires at 480 ticks and new drops cannot be picked in same tick
+  ---
+  duration_ms: 2.5295
+  type: 'test'
+  ...
+# Subtest: night 2 bridge is walkable and jump pads preserve launch despite opposite movement input
+ok 41 - night 2 bridge is walkable and jump pads preserve launch despite opposite movement input
+  ---
+  duration_ms: 2.1015
+  type: 'test'
+  ...
+# Subtest: night 3 cliffs block ascent, ramps reach tier 1, pad reaches tier 2 and tower blocks walking
+ok 42 - night 3 cliffs block ascent, ramps reach tier 1, pad reaches tier 2 and tower blocks walking
+  ---
+  duration_ms: 3.878
+  type: 'test'
+  ...
+# Subtest: charm applies 600 ticks, clears dash cooldown, cannot restart an active dash
+ok 43 - charm applies 600 ticks, clears dash cooldown, cannot restart an active dash
+  ---
+  duration_ms: 0.6558
+  type: 'test'
+  ...
+# Subtest: drifters steal before shades hit; invulnerability and lamp safety do not stop theft
+ok 44 - drifters steal before shades hit; invulnerability and lamp safety do not stop theft
+  ---
+  duration_ms: 1.1237
+  type: 'test'
+  ...
+# Subtest: pulse makes chasing drifter flee; pulse on laden fleeing drifter drops loot with 120 tick exit
+ok 45 - pulse makes chasing drifter flee; pulse on laden fleeing drifter drops loot with 120 tick exit
+  ---
+  duration_ms: 1.9059
+  type: 'test'
+  ...
+# Subtest: drifter spawn schedule is night 2/3 only and caps at two active entities
+ok 46 - drifter spawn schedule is night 2/3 only and caps at two active entities
+  ---
+  duration_ms: 42.1467
+  type: 'test'
+  ...
+# Subtest: night 3 wind warns two seconds before 30s, then pushes at 2m/s for 5s
+ok 47 - night 3 wind warns two seconds before 30s, then pushes at 2m/s for 5s
+  ---
+  duration_ms: 15.8465
+  type: 'test'
+  ...
+# Subtest: same seed/input/scenario reproduces all nights including random entities and wind
+ok 48 - same seed/input/scenario reproduces all nights including random entities and wind
+  ---
+  duration_ms: 429.8145
+  type: 'test'
+  ...
+# Subtest: scenario overrides preserve other lamps, replace entity lists, and honor timers/states
+ok 49 - scenario overrides preserve other lamps, replace entity lists, and honor timers/states
+  ---
+  duration_ms: 0.5543
+  type: 'test'
+  ...
+# Subtest: invalid schema, timers, ids, states, inputs and unsupported night are rejected
+ok 50 - invalid schema, timers, ids, states, inputs and unsupported night are rejected
+  ---
+  duration_ms: 2.1492
+  type: 'test'
+  ...
+# Subtest: web server serves the built game and local Three.js modules
+ok 51 - web server serves the built game and local Three.js modules
+  ---
+  duration_ms: 608.0528
+  type: 'test'
+  ...
+# Subtest: UI handlers support menu/briefing/three-night score flow, loss retry, pause and persisted settings (DOM stub, no WebGL)
+ok 52 - UI handlers support menu/briefing/three-night score flow, loss retry, pause and persisted settings (DOM stub, no WebGL)
+  ---
+  duration_ms: 25.3495
+  type: 'test'
+  ...
+1..52
+# tests 52
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1775.1485

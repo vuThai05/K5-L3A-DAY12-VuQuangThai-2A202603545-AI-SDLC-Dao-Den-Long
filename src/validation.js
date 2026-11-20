@@ -3,6 +3,7 @@ import { levelFor } from './levels.js';
 const object = x => x !== null && typeof x === 'object' && !Array.isArray(x);
 const number = x => typeof x === 'number' && Number.isFinite(x);
 const count = x => Number.isSafeInteger(x) && x >= 0;
+export const capacityFor = lights => Math.min(T.capacity_max, T.carry_capacity + 2 * lights);
 export const position = x => Array.isArray(x) && x.length === 3 && x.every(number);
 function valid(ok, msg) { if (!ok) throw new Error(msg); }
 function timerFields(o, keys) { for (const key of keys) if (key in o) valid(count(o[key]), `invalid ${key}`); }
@@ -22,7 +23,8 @@ export function validateScenario(s, night = 1) {
     const p = s.player; valid(object(p), 'invalid player');
     if ('pos' in p) valid(position(p.pos), 'invalid player.pos');
     if ('vel' in p) valid(position(p.vel), 'invalid player.vel');
-    if ('carried' in p) valid(count(p.carried) && p.carried <= T.carry_capacity, 'invalid player.carried');
+    if ('successful_lights' in p) valid(count(p.successful_lights), 'invalid successful_lights');
+    if ('carried' in p) valid(count(p.carried) && p.carried <= capacityFor(p.successful_lights ?? 0), 'invalid player.carried');
     if ('flames' in p) valid(count(p.flames) && p.flames <= T.flames, 'invalid player.flames');
     timerFields(p, ['invuln_ticks', 'dash_cd_ticks', 'pulse_cd_ticks', 'charm_ticks']);
   }
@@ -38,10 +40,13 @@ export function validateScenario(s, night = 1) {
     if ('pos' in l) valid(position(l.pos), 'invalid lantern.pos');
     if ('deposited' in l) valid(count(l.deposited) && l.deposited <= T.lantern_cost, 'invalid deposited');
     if ('lit' in l) valid(typeof l.lit === 'boolean', 'invalid lit');
+    if ('fuel' in l) valid(number(l.fuel) && l.fuel >= 0 && l.fuel <= T.fuel_max, 'invalid fuel');
+    if ('ever_lit' in l) valid(typeof l.ever_lit === 'boolean', 'invalid ever_lit');
   });
   if ('shades' in s) entities(s.shades, 'shade', e => {
     valid(position(e.pos), 'invalid shade.pos');
-    if ('state' in e) valid(['spawning', 'wander', 'chase', 'recoil', 'stunned'].includes(e.state), 'invalid shade.state');
+    if ('state' in e) valid(['spawning', 'wander', 'chase', 'recoil', 'stunned', 'drain'].includes(e.state), 'invalid shade.state');
+    if ('target_lantern_id' in e) valid(level.lamps.some((_, i) => e.target_lantern_id === `L${i + 1}`), 'invalid target_lantern_id');
     timerFields(e, ['state_ticks_left']);
   });
   if ('drifters' in s) entities(s.drifters, 'drifter', e => {

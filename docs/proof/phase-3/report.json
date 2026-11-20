@@ -1,0 +1,134 @@
+{
+  "verified_at": "2026-11-20T09:29:16.513Z",
+  "contract_version": "1.2",
+  "node": "v22.18.0",
+  "platform": "win32",
+  "results": [
+    {
+      "command": "node --test",
+      "status": 0
+    },
+    {
+      "command": "node --check src/main.js",
+      "status": 0
+    },
+    {
+      "command": "node --check src/scene.js",
+      "status": 0
+    },
+    {
+      "command": "node --check src/audio.js",
+      "status": 0
+    },
+    {
+      "command": "node --check src/game.js",
+      "status": 0
+    },
+    {
+      "command": "node scripts/build.js",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 3000 --snapshot-every 60 --scenario docs/proof/phase-3/win-scenario.json --inputs docs/proof/phase-3/win-inputs.json --out docs/proof/phase-3/win.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 3000 --snapshot-every 60 --scenario docs/proof/phase-3/win-scenario.json --inputs docs/proof/phase-3/win-inputs.json --out docs/proof/phase-3/win.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 600 --scenario docs/proof/phase-3/loss-scenario.json --inputs docs/proof/phase-3/loss-inputs.json --out docs/proof/phase-3/loss.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-3/pulse-scenario.json --inputs docs/proof/phase-3/pulse-inputs.json --out docs/proof/phase-3/pulse.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-3/dawn-scenario.json --inputs docs/proof/phase-3/dawn-inputs.json --out docs/proof/phase-3/dawn.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 900 --snapshot-every 120 --out docs/proof/phase-3/seeded.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 900 --snapshot-every 120 --out docs/proof/phase-3/seeded.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 1 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-3/night-1.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 1 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-3/night-1.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 2 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-3/night-2.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 2 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-3/night-2.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 3 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-3/night-3.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 123 --night 3 --ticks 1900 --snapshot-every 120 --out docs/proof/phase-3/night-3.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-3/fuel-cycle-scenario.json --inputs docs/proof/phase-3/fuel-cycle-inputs.json --out docs/proof/phase-3/fuel-cycle.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 120 --scenario docs/proof/phase-3/fuel-cycle-scenario.json --inputs docs/proof/phase-3/fuel-cycle-inputs.json --out docs/proof/phase-3/fuel-cycle.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 180 --scenario docs/proof/phase-3/drain-scenario.json --inputs docs/proof/phase-3/drain-inputs.json --out docs/proof/phase-3/drain.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 1 --ticks 180 --scenario docs/proof/phase-3/drain-scenario.json --inputs docs/proof/phase-3/drain-inputs.json --out docs/proof/phase-3/drain.jsonl",
+      "status": 0
+    },
+    {
+      "command": "node src/headless.js --seed 12 --night 3 --ticks 18000 --snapshot-every 600 --scenario docs/proof/phase-3/benchmark-scenario.json --out docs/proof/phase-3/benchmark.jsonl",
+      "status": 0
+    }
+  ],
+  "deterministic_nights": [
+    {
+      "night": 1,
+      "sha256": "9e8cf9708d1014e153aa099bb70314a4b29f94c1f7b7d52fa4e62088116a09e4"
+    },
+    {
+      "night": 2,
+      "sha256": "80a0e479d1b8e2b35dc0e7c0f9ffe0cdacb4dea81c3170c95210ed08a34e7059"
+    },
+    {
+      "night": 3,
+      "sha256": "346c1a89e9ecef7ac42af807d0f1b8bb8c124d99b94559118b47461c20739146"
+    }
+  ],
+  "benchmark": {
+    "ticks": 18000,
+    "elapsed_ms": 696,
+    "budget_ms": 30000,
+    "wind_disabled": true,
+    "note": "Full 300s Night 3. Player on tier 2, L1 initially lit and allowed to expire, other lamps unlit; standard random spawns enabled. Includes CLI and JSONL I/O; not FPS or worst-case measurement."
+  },
+  "deterministic_win_sha256": "da9aa5c8ab92d6c947f42d9fee2856d710f7bda6eb53c15d6c9aad3061083fa2",
+  "win": {
+    "type": "end",
+    "ticks": 2400,
+    "state": "won",
+    "score": 1518
+  },
+  "win_fixture": "40s scenario at standard Night 1 lamp positions, ten motes per lamp, random spawns off; verifies movement/deposit and waiting for dawn, not full-night human balance.",
+  "visual_verification": "Not run per user instruction. HTTP/module checks and a DOM stub exercise flow/settings handlers; they do not verify rendered graphics, audio quality, FPS or human playability."
+}
